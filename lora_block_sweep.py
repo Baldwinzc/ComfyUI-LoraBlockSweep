@@ -450,6 +450,11 @@ class LoraBlockSweepFluxBatch:
         return (images_batch, info, blocks_used, values_used)
 
 
+# Default grouping is a naive even split — three thirds of the double blocks
+# plus three thirds of the single blocks, then both whole halves as anchors.
+# It has no prior knowledge of which blocks "belong together"; treat it as a
+# starting point and edit per LoRA once the first sweep reveals where the
+# action actually concentrates.
 DEFAULT_GROUPS = (
     "D00-D06\n"
     "D07-D12\n"
@@ -533,7 +538,12 @@ class LoraBlockSweepFluxGroup:
                 "groups": ("STRING",
                            {"default": DEFAULT_GROUPS, "multiline": True,
                             "tooltip": "One group per line. Use D00-D06 for "
-                                       "a range, comma to combine ranges."}),
+                                       "a range, comma to combine ranges "
+                                       "(e.g. D00-D06,S20-S25). "
+                                       "Default is a naive even split with "
+                                       "no prior knowledge - edit per LoRA "
+                                       "once a first sweep shows where the "
+                                       "effect concentrates."}),
                 "modes": ("STRING",
                           {"default": DEFAULT_MODES,
                            "tooltip": "Comma list of column types. "
