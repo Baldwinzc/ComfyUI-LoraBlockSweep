@@ -7,9 +7,9 @@
 [![ComfyUI](https://img.shields.io/badge/ComfyUI-custom%20node-success)](https://github.com/comfyanonymous/ComfyUI)
 [![Model: FLUX](https://img.shields.io/badge/model-FLUX-orange)](https://blackforestlabs.ai/)
 
-Per-block LoRA weighting for **FLUX**. Scan every transformer block (19 double
-+ 38 single = 57), sweep their strengths, and read the impact of each block
-straight off a labeled grid.
+Per-block LoRA weighting for **FLUX**. Scan every transformer block
+(19 double + 38 single = 57), sweep their strengths, and read the impact
+of each block straight off a labeled grid.
 
 ![Group knockout: Full / Top-7 off / Bot-7 off / No LoRA](docs/hero_group.png)
 
