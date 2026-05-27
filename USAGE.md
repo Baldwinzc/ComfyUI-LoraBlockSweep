@@ -1,5 +1,7 @@
 # Usage Guide
 
+**English** | [简体中文](USAGE.zh-CN.md)
+
 ## Install
 
 1. Find your ComfyUI install (the folder that has `custom_nodes/`)
