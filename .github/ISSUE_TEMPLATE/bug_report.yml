@@ -1,0 +1,40 @@
+name: Bug report
+description: Something broke or behaved unexpectedly
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: Expected behavior vs actual behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction steps
+      description: Workflow, inputs, exact node configuration. A workflow JSON attachment is ideal.
+    validations:
+      required: true
+  - type: input
+    id: comfyui
+    attributes:
+      label: ComfyUI version
+      placeholder: "e.g. v0.3.x or commit hash"
+    validations:
+      required: true
+  - type: input
+    id: model
+    attributes:
+      label: Model + LoRA used
+      placeholder: "e.g. flux1-dev + frosting_lane_flux"
+  - type: input
+    id: gpu
+    attributes:
+      label: GPU / VRAM
+      placeholder: "e.g. RTX 4090 24GB"
+  - type: textarea
+    id: logs
+    attributes:
+      label: Console output / traceback
+      render: shell

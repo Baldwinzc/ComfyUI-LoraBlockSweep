@@ -4,3 +4,8 @@ __pycache__/
 .DS_Store
 .vscode/
 .idea/
+
+# Local experiment scratch — heavy PNGs, raw cell dumps.
+_dev/sweep_*_results/
+_dev/smoke_test_output.png
+

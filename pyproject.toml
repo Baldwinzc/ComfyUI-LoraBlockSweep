@@ -1,0 +1,27 @@
+[project]
+name = "comfyui-lorablocksweep"
+description = "Per-block LoRA weighting for Flux: scan all 57 transformer blocks (D00-D18, S00-S37), batch-sweep strengths, and render labeled comparison grids."
+version = "1.0.0"
+license = { file = "LICENSE" }
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+    { name = "Baldwinzc", email = "1018067278@qq.com" },
+]
+keywords = ["comfyui", "lora", "flux", "stable-diffusion", "image-generation", "ablation"]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = []
+
+[project.urls]
+Repository = "https://github.com/Baldwinzc/ComfyUI-LoraBlockSweep"
+"Bug Tracker" = "https://github.com/Baldwinzc/ComfyUI-LoraBlockSweep/issues"
+
+[tool.comfy]
+PublisherId = "baldwinzc"
+DisplayName = "ComfyUI-LoraBlockSweep"
+Icon = ""
