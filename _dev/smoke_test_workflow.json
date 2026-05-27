@@ -1,0 +1,76 @@
+{
+  "1": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "flux1-Dev_FP8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "2": {
+    "class_type": "DualCLIPLoader",
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp16.safetensors",
+      "type": "flux"
+    }
+  },
+  "3": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "4": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "frstingln illustration, portrait of a young person, head and shoulders, neutral expression, soft natural lighting, plain pastel background",
+      "clip": ["2", 0]
+    }
+  },
+  "5": {
+    "class_type": "ConditioningZeroOut",
+    "inputs": {
+      "conditioning": ["4", 0]
+    }
+  },
+  "6": {
+    "class_type": "EmptySD3LatentImage",
+    "inputs": {
+      "width": 768,
+      "height": 768,
+      "batch_size": 1
+    }
+  },
+  "7": {
+    "class_type": "LoraBlockSweepFluxBatch",
+    "inputs": {
+      "model": ["1", 0],
+      "vae": ["3", 0],
+      "lora_name": "flux_dev_frostinglane_araminta_k.safetensors",
+      "positive": ["4", 0],
+      "negative": ["5", 0],
+      "latent_image": ["6", 0],
+      "seed": 42,
+      "steps": 20,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0,
+      "block_list": "D00",
+      "value_list": "1.0",
+      "baseline_weight": 1.0
+    }
+  },
+  "8": {
+    "class_type": "LoraBlockSweepSaveGrid",
+    "inputs": {
+      "images": ["7", 0],
+      "blocks": "D00",
+      "values": "1.0",
+      "filename_prefix": "smoke_test",
+      "label_size": 36,
+      "pad": 16,
+      "compress_level": 4
+    }
+  }
+}
