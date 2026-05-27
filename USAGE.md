@@ -2,125 +2,127 @@
 
 ## Install
 
-1. Find your ComfyUI install (the one with `custom_nodes/` folder)
-2. Copy this whole folder there:
+1. Find your ComfyUI install (the folder that has `custom_nodes/`)
+2. Clone or copy this folder there:
 
-   ```
-   cp -r D:/code/ComfyUI-LoraBlockSweep <ComfyUI>/custom_nodes/
+   ```bash
+   cd <ComfyUI>/custom_nodes
+   git clone https://github.com/Baldwinzc/ComfyUI-LoraBlockSweep.git
    ```
 
 3. Restart ComfyUI
 
-## Replace LoraLoader 78 in your workflow
+## Quickstart: knock-out sweep with Efficiency XY Plot
 
-In the Z-Image -> Flux Kontext workflow, node 78 (`LoraLoader`) is the one to
-replace. Steps:
+Drop in `LoRA Block Sweep (FLUX)` where you'd normally use `LoraLoader`:
 
-1. Right-click node 78 -> Remove (note its connections first):
+```
+UNETLoader      ──┐
+                  ├──▶ LoRA Block Sweep (FLUX) ──▶ KSampler
+DualCLIPLoader ──┘
+                       lora_name = <your_lora>.safetensors
+                       baseline_weight = 1.0
+                       target_block    = (overridden by XY plot)
+                       target_value    = (overridden by XY plot)
+                       clip_strength   = 1.0
+```
+
+Wire **XY Plot** (from
+[efficiency-nodes-comfyui](https://github.com/jags111/efficiency-nodes-comfyui)):
+
+- **X axis** — `XY Input: String`, override `target_block`, paste:
 
    ```
-   model in  <- UNETLoader 73
-   clip  in  <- DualCLIPLoader 74
-   MODEL out -> KSampler 83
-   CLIP  out -> CLIPTextEncode 86
+   D00,D01,D02,D03,D04,D05,D06,D07,D08,D09,D10,D11,D12,D13,D14,D15,D16,D17,D18,S00,S01,S02,S03,S04,S05,S06,S07,S08,S09,S10,S11,S12,S13,S14,S15,S16,S17,S18,S19,S20,S21,S22,S23,S24,S25,S26,S27,S28,S29,S30,S31,S32,S33,S34,S35,S36,S37
    ```
 
-2. Add `LoRA Block Sweep (FLUX)` node, reconnect the same way
+- **Y axis** — `XY Input: Number`, override `target_value`, values:
+  `0,0.25,0.5,0.75,1.0`
 
-3. Set `lora_name = xdt_i2i/xdt_char_i2i_v1_copy.safetensors`
+Result: 57 × 5 = 285 image grid. Each cell shows the output when **one** block
+is dialed to that strength while the other 56 stay at `baseline_weight = 1.0`.
 
-## Knock-out experiment (recommended first round)
+### Reading the grid
 
-- `baseline_weight = 1.0`
-- `target_block` = (will be swept by XY)
-- `target_value` = (will be swept by XY)
-- `clip_strength = 1.0`
+- Column-wise nearly identical → block is non-critical, can be lowered freely
+- Column-wise visible change → block carries weight, keep it high
+- Column-wise improving as value drops → block introduces unwanted artifacts;
+  consider keeping it permanently lower
 
-Add Efficiency Nodes XY Plot:
+## Solo sweep (optional second round)
 
-- X axis: `XY Input: String`
-  - Override input: `target_block`
-  - Values (paste this comma-separated string):
+Same setup, flip `baseline_weight = 0.0`. Now each cell shows what the target
+block contributes **alone** (everything else off). Useful for understanding
+what each block independently "knows".
 
-    ```
-    D00,D01,D02,D03,D04,D05,D06,D07,D08,D09,D10,D11,D12,D13,D14,D15,D16,D17,D18,S00,S01,S02,S03,S04,S05,S06,S07,S08,S09,S10,S11,S12,S13,S14,S15,S16,S17,S18,S19,S20,S21,S22,S23,S24,S25,S26,S27,S28,S29,S30,S31,S32,S33,S34,S35,S36,S37
-    ```
+## All-in-one: Batch node (no XY plot needed)
 
-- Y axis: `XY Input: Number`
-  - Override input: `target_value`
-  - Values: `0,0.25,0.5,0.75,1.0`
+If you don't want to install Efficiency Nodes, use **LoRA Block Sweep Batch
+(FLUX)** instead. It internally loops over `(block, value)`, samples each, and
+returns a batched IMAGE.
 
-Result: 57 x 5 = 285 image grid. Each cell shows what happens when ONE block
-is dialed to that strength while the other 56 stay at 1.0.
+```
+UNETLoader            ─→ model
+VAELoader             ─→ vae
+CLIPTextEncode        ─→ positive
+ConditioningZeroOut   ─→ negative
+EmptySD3LatentImage   ─→ latent_image
+                         lora_name        = <your_lora>.safetensors
+                         block_list       = D00,D01,...,D18,S00,...,S37  (or a subset)
+                         value_list       = 0,0.25,0.5,0.75,1.0
+                         baseline_weight  = 1.0  (knock-out)  |  0.0 (solo)
+                         seed/steps/cfg/sampler/scheduler/denoise = same as KSampler
 
-Reading the grid:
+images out ─→ LoRA Block Sweep Save Grid   (labeled grid PNG)
+           └→ SaveImage                    (also keeps individual cells)
+```
 
-- Column-wise nearly identical -> that block is non-critical, can be lowered
-- Column-wise dramatic change -> that block is critical, keep at 1.0
-- Column-wise improving as value drops -> that block has unwanted effects,
-  consider lowering it permanently
+`CLIP` input is intentionally absent — positive/negative are already encoded
+upstream, so CLIP-side LoRA patches would have no effect. If you need
+CLIP-side LoRA, use the regular Block Sweep node + Efficiency XY Plot.
 
-## Solo experiment (optional second round)
+### First-round recipe (recommended)
 
-Same setup, but change `baseline_weight = 0.0`. Now each cell shows what the
-block alone contributes (everything else off). Useful for understanding
-what each block "knows."
+For a faster first pass, scan only the 19 double blocks:
 
-## Custom fine-tune (after the sweep)
+```
+D00,D01,D02,D03,D04,D05,D06,D07,D08,D09,D10,D11,D12,D13,D14,D15,D16,D17,D18
+```
 
-Use `LoRA Block Sweep Custom (FLUX)`. Paste a 57-value string in the order:
+That's 19 × 5 = 95 images. After reviewing, expand to the 38 single blocks
+in a second run if needed. (The README demo follows exactly this recipe.)
+
+## Group sweeps (after narrowing down)
+
+Use **LoRA Block Sweep Group (FLUX)** to sweep contiguous block ranges as a
+single unit. Groups can be ranges (`D00-D06`), individual blocks (`S15`),
+or mixed comma-lists (`D00-D03,S20`). Ranges may not cross D and S.
+
+The default 8-group split is a naive even partition — three thirds of the
+double blocks plus three thirds of the single blocks, then both whole halves
+as anchors. **Treat it as a starting point and edit per LoRA once the
+single-block sweep reveals where the action concentrates.**
+
+## Fine-tune all 57 blocks
+
+Use **LoRA Block Sweep Custom (FLUX)**. Paste a 57-value comma list in the
+order:
 
     D00,D01,...,D18,S00,S01,...,S37
 
-Example: keep all double blocks, drop late single blocks:
-
-    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0,0,0,0,0,0
-
-## Node 3: LoRA Block Sweep Batch (FLUX) — all-in-one
-
-Self-contained sweep that does NOT need Efficiency Nodes XY Plot. Internally
-loops over (block, value) combinations, samples for each, and returns a
-batched IMAGE output.
-
-Replaces both the LoRA loader AND the KSampler. Wire VAE in directly.
-
-### Wiring
+Example — keep all double blocks at full, taper late single blocks:
 
 ```
-UNETLoader 73 ─→ model
-VAE         75 ─→ vae
-                  lora_name = xdt_i2i/xdt_char_i2i_v1_copy.safetensors
-CLIPTextEncode 86 ─→ positive  (encode prompts as usual)
-ConditioningZeroOut 82 ─→ negative
-EmptySD3LatentImage / VAEEncode 79 ─→ latent_image
-                  seed/steps/cfg/sampler/scheduler/denoise: same as KSampler
-                  block_list  = D00,D01,...,D18,S00,...,S37  (or trim)
-                  value_list  = 0,0.25,0.5,0.75,1.0
-                  baseline_weight = 1.0  (Knock-out) or 0.0 (Solo)
-                  
-images output → SaveImage   (saves all N images, batched)
+1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0,0,0,0,0,0
 ```
-
-The CLIP input is intentionally absent — CLIP-side LoRA changes have no
-effect because positive/negative are already encoded upstream. If you need
-CLIP-side LoRA, use the regular Block Sweep node + external XY plot
-instead.
-
-### First-round recipe
-
-For a faster first pass, edit `block_list` to only the 19 double blocks:
-
-    D00,D01,D02,D03,D04,D05,D06,D07,D08,D09,D10,D11,D12,D13,D14,D15,D16,D17,D18
-
-That's 19 x 5 = 95 images. After reviewing, expand to the 38 single blocks
-in a second run if needed.
 
 ## Tips
 
-- Set seed to fixed in KSampler so the only variable in the grid is block weight
-- Use a low resolution (e.g. 768x768) for the sweep to save time, then re-test
-  the best settings at full resolution
-- 285 images at 25 steps will take 1-3 hours on a single GPU. Consider doing
-  just the double blocks first (19 x 5 = 95 images) before committing
-- The `info` STRING output can be wired to a `ShowText` node so each cell
-  displays its parameters
+- **Fix the seed.** The grid is meaningless if the only variable isn't block weight.
+- **Sweep at low res** (768×768, ~20 steps) to stay under an hour. Re-test the
+  best settings at full resolution after.
+- **285 images at 20–25 steps takes 1–3 h** on a single consumer GPU. Always
+  start with the 19 double blocks (95 images, ~20 min on an H800) before
+  committing to the full sweep.
+- Wire the `info` STRING output to a `ShowText` node to see each cell's
+  parameters in the UI.
