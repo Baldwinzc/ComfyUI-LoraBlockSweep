@@ -6,10 +6,11 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
 [![ComfyUI](https://img.shields.io/badge/ComfyUI-custom%20node-success)](https://github.com/comfyanonymous/ComfyUI)
 [![Model: FLUX](https://img.shields.io/badge/model-FLUX-orange)](https://blackforestlabs.ai/)
+[![Model: Qwen-Image](https://img.shields.io/badge/model-Qwen--Image-purple)](https://github.com/QwenLM/Qwen-Image)
 
-为 **FLUX** 提供按块（per-block）的 LoRA 权重控制。扫描全部 57 个 transformer
-block（19 个 double + 38 个 single），独立设置每块强度，从标注网格里直接
-读出每块的影响。
+为 DiT 系列模型提供按块（per-block）的 LoRA 权重控制 —— **FLUX**（19 个
+double + 38 个 single = 57 块）和 **Qwen-Image**（60 个 transformer 块）。
+独立设置每块强度，从标注网格里直接读出每块的影响。
 
 ![分组关掉对比：Full / Top-7 off / Bot-7 off / No LoRA](docs/hero_group.png)
 
@@ -101,11 +102,15 @@ git clone https://github.com/Baldwinzc/ComfyUI-LoraBlockSweep.git
 
 | 节点 | 适用场景 |
 |------|----------|
-| **LoRA Block Sweep (FLUX)** | 可直接替换 `LoraLoader`,一次一个块 × 一个值。配 Efficiency XY Plot 跑网格扫描。 |
-| **LoRA Block Sweep Batch (FLUX)** | 一体式:内部循环 `(block, value)`、逐个采样、返回 batched IMAGE。不需要 XY plot。上面 demo 用的就是它。 |
-| **LoRA Block Sweep Group (FLUX)** | 对**块组**扫描(比如 `D00-D06`、`S15-S20`),适合大致定位之后做细化。 |
-| **LoRA Block Sweep Custom (FLUX)** | 终极调试:通过逗号分隔列表单独设置全部 57 个块。 |
-| **LoRA Block Sweep Save Grid** | 把 batched IMAGE 输出渲染成标注网格 PNG(Y 轴块名、X 轴权重)。 |
+| **LoRA Block Sweep (FLUX)** / **(Qwen-Image)** | 可直接替换 `LoraLoader`,一次一个块 × 一个值。配 Efficiency XY Plot 跑网格扫描。 |
+| **LoRA Block Sweep Batch (FLUX)** / **(Qwen-Image)** | 一体式:内部循环 `(block, value)`、逐个采样、返回 batched IMAGE。不需要 XY plot。上面 demo 用的就是 FLUX 版本。 |
+| **LoRA Block Sweep Group (FLUX)** / **(Qwen-Image)** | 对**块组**扫描(比如 `D00-D06`、`B10-B19`),适合大致定位之后做细化。 |
+| **LoRA Block Sweep Custom (FLUX)** / **(Qwen-Image)** | 终极调试:通过逗号分隔列表单独设置每一个块(FLUX 57 个,Qwen-Image 60 个)。 |
+| **LoRA Block Sweep Save Grid** | 把 batched IMAGE 输出渲染成标注网格 PNG(Y 轴块名、X 轴权重)。模型无关。 |
+
+块标签:
+- **FLUX**:`D00..D18`(double-stream)+ `S00..S37`(single-stream)= 57 块
+- **Qwen-Image**:`B00..B59` = 60 个 transformer 块
 
 `baseline_weight` 决定实验模式:
 
@@ -118,13 +123,20 @@ git clone https://github.com/Baldwinzc/ComfyUI-LoraBlockSweep.git
 
 详细 workflow 食谱见 [USAGE.md](USAGE.md)。
 
-## 为什么是 FLUX 专用
+## 为什么要按模型出适配器
 
-FLUX 的 transformer 结构和 SDXL 不一样:19 个 double-stream block +
-38 个 single-stream block。为 SDXL 的 U-Net 写的按块 LoRA 加载器
-映射不过来。本节点用正则 `diffusion_model.double_blocks.{N}.` /
-`diffusion_model.single_blocks.{N}.` 按 FLUX 真实块索引分组 LoRA key,
-确保你设的权重对应模型实际跑的 transformer。
+每个 DiT 模型的 transformer 块结构都不一样,为 SDXL U-Net 写的按块
+LoRA 加载器映射不过来:
+
+- **FLUX**:19 个 double-stream 块(`double_blocks.{N}`)+ 38 个
+  single-stream 块(`single_blocks.{N}`)。标签 `D00..D18` 和 `S00..S37`。
+- **Qwen-Image**:60 个 single-stream MMDiT 块(`transformer_blocks.{N}`),
+  每块内部做图文联合注意力。标签 `B00..B59`。
+
+本节点按各自模型的真实块索引,通过正则匹配 state_dict key 来分组 LoRA
+权重,确保你设的强度对应模型实际跑的 transformer。新增一个 DiT 模型
+只需写一个 `BlockSpec` 加 4 个薄子类 —— 模板见
+`lora_block_sweep/_qwen.py`。
 
 ## 致谢 / 灵感来源
 

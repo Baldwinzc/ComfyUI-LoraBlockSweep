@@ -113,6 +113,47 @@ D00,D01,D02,D03,D04,D05,D06,D07,D08,D09,D10,D11,D12,D13,D14,D15,D16,D17,D18
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0,0,0,0,0,0
 ```
 
+## Qwen-Image
+
+Qwen-Image 有 60 个 single-stream transformer 块（标签 `B00..B59`）。
+所有 Qwen 节点和 FLUX 节点一一对应 —— 只是把节点名里的 `(FLUX)` 换成
+`(Qwen-Image)`，块标签从 `D00-D18,S00-S37` 换成 `B00..B59`。
+
+```
+UNETLoader            ─→ model (qwen_image_fp8_e4m3fn.safetensors)
+ModelSamplingAuraFlow ─→ model (shift = 4.0)
+VAELoader             ─→ vae   (qwen_image_vae.safetensors)
+CLIPLoader            ─→ clip  (qwen_2.5_vl_7b_fp8_scaled.safetensors, type=qwen_image)
+CLIPTextEncode        ─→ positive / negative (空字符串)
+EmptySD3LatentImage   ─→ latent_image
+                         lora_name = <your_qwen_lora>.safetensors
+                         block_list = B00,B01,...,B59  (或子集)
+                         value_list = 0,0.25,0.5,0.75,1.0
+                         baseline_weight = 1.0 (knock-out) | 0.0 (solo)
+                         seed/steps/cfg = 跟你工作流一致
+                         (Qwen-Image Lightning: 8 steps, cfg=1.0)
+
+images out ─→ LoRA Block Sweep Save Grid   （标注网格 PNG）
+           └→ SaveImage                    （也保留单独的格子）
+```
+
+配 Efficiency XY Plot 用的话，X 轴粘贴 60 个 Qwen 块标签：
+
+```
+B00,B01,B02,B03,B04,B05,B06,B07,B08,B09,B10,B11,B12,B13,B14,B15,B16,B17,B18,B19,B20,B21,B22,B23,B24,B25,B26,B27,B28,B29,B30,B31,B32,B33,B34,B35,B36,B37,B38,B39,B40,B41,B42,B43,B44,B45,B46,B47,B48,B49,B50,B51,B52,B53,B54,B55,B56,B57,B58,B59
+```
+
+### 第一轮推荐配方（Qwen-Image）
+
+60 × 5 = 300 张图比较多。为了更快拿到首轮信号，每 5 块取一个：
+
+```
+B00,B05,B10,B15,B20,B25,B30,B35,B40,B45,B50,B55
+```
+
+12 × 5 = 60 张图。看出 action 集中在哪一段之后，用 Group 节点对那段
+连续范围（如 `B20-B29`）做细化。
+
 ## 小贴士
 
 - **固定 seed。** 如果唯一变量不是块权重，这张网格就没意义了。

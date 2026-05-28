@@ -118,6 +118,49 @@ Example — keep all double blocks at full, taper late single blocks:
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0,0,0,0,0,0
 ```
 
+## Qwen-Image
+
+Qwen-Image has 60 single-stream transformer blocks (tags `B00..B59`).
+Every Qwen node mirrors the FLUX node above — just swap `(FLUX)` for
+`(Qwen-Image)` in the node name and use `B00..B59` instead of
+`D00-D18,S00-S37`.
+
+```
+UNETLoader            ─→ model (qwen_image_fp8_e4m3fn.safetensors)
+ModelSamplingAuraFlow ─→ model (shift = 4.0)
+VAELoader             ─→ vae   (qwen_image_vae.safetensors)
+CLIPLoader            ─→ clip  (qwen_2.5_vl_7b_fp8_scaled.safetensors, type=qwen_image)
+CLIPTextEncode        ─→ positive / negative (empty)
+EmptySD3LatentImage   ─→ latent_image
+                         lora_name = <your_qwen_lora>.safetensors
+                         block_list = B00,B01,...,B59  (or a subset)
+                         value_list = 0,0.25,0.5,0.75,1.0
+                         baseline_weight = 1.0 (knock-out) | 0.0 (solo)
+                         seed/steps/cfg = workflow-appropriate
+                         (Qwen-Image Lightning: 8 steps, cfg=1.0)
+
+images out ─→ LoRA Block Sweep Save Grid   (labeled grid PNG)
+           └→ SaveImage                    (also keeps individual cells)
+```
+
+For an Efficiency XY Plot setup, paste the 60 Qwen block tags as the
+X-axis values:
+
+```
+B00,B01,B02,B03,B04,B05,B06,B07,B08,B09,B10,B11,B12,B13,B14,B15,B16,B17,B18,B19,B20,B21,B22,B23,B24,B25,B26,B27,B28,B29,B30,B31,B32,B33,B34,B35,B36,B37,B38,B39,B40,B41,B42,B43,B44,B45,B46,B47,B48,B49,B50,B51,B52,B53,B54,B55,B56,B57,B58,B59
+```
+
+### First-round recipe (Qwen-Image)
+
+60 × 5 = 300 images is a lot. For a faster signal, pick every 5th block:
+
+```
+B00,B05,B10,B15,B20,B25,B30,B35,B40,B45,B50,B55
+```
+
+12 × 5 = 60 images. Once you see which neighbourhood the action is in,
+zoom in with the Group node on contiguous ranges (e.g. `B20-B29`).
+
 ## Tips
 
 - **Fix the seed.** The grid is meaningless if the only variable isn't block weight.

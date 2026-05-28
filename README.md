@@ -6,10 +6,12 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
 [![ComfyUI](https://img.shields.io/badge/ComfyUI-custom%20node-success)](https://github.com/comfyanonymous/ComfyUI)
 [![Model: FLUX](https://img.shields.io/badge/model-FLUX-orange)](https://blackforestlabs.ai/)
+[![Model: Qwen-Image](https://img.shields.io/badge/model-Qwen--Image-purple)](https://github.com/QwenLM/Qwen-Image)
 
-Per-block LoRA weighting for **FLUX**. Scan every transformer block
-(19 double + 38 single = 57), sweep their strengths, and read the impact
-of each block straight off a labeled grid.
+Per-block LoRA weighting for DiT models — **FLUX** (19 double + 38 single
+= 57 blocks) and **Qwen-Image** (60 transformer blocks). Sweep each block's
+strength independently and read the impact of every block straight off a
+labeled grid.
 
 ![Group knockout: Full / Top-7 off / Bot-7 off / No LoRA](docs/hero_group.png)
 
@@ -105,11 +107,15 @@ Dependencies (`numpy`, `Pillow`, `torch`) are already pulled in by ComfyUI.
 
 | Node | Use when |
 |------|----------|
-| **LoRA Block Sweep (FLUX)** | Drop-in `LoraLoader` replacement, one block × one value. Wire to Efficiency XY Plot for grid sweeps. |
-| **LoRA Block Sweep Batch (FLUX)** | All-in-one: loops over `(block, value)` internally, samples each, returns a batched IMAGE. No XY plot needed. Used in the demo above. |
-| **LoRA Block Sweep Group (FLUX)** | Sweep *grouped* blocks (e.g. `D00-D06`, `S15-S20`) once you've narrowed down where the action is. |
-| **LoRA Block Sweep Custom (FLUX)** | Final pass: set all 57 blocks individually via a comma-separated list. |
-| **LoRA Block Sweep Save Grid** | Renders the batched IMAGE output into a labeled grid PNG (block names on Y axis, weights on X axis). |
+| **LoRA Block Sweep (FLUX)** / **(Qwen-Image)** | Drop-in `LoraLoader` replacement, one block × one value. Wire to Efficiency XY Plot for grid sweeps. |
+| **LoRA Block Sweep Batch (FLUX)** / **(Qwen-Image)** | All-in-one: loops over `(block, value)` internally, samples each, returns a batched IMAGE. No XY plot needed. Used in the demo above. |
+| **LoRA Block Sweep Group (FLUX)** / **(Qwen-Image)** | Sweep *grouped* blocks (e.g. `D00-D06`, `B10-B19`) once you've narrowed down where the action is. |
+| **LoRA Block Sweep Custom (FLUX)** / **(Qwen-Image)** | Final pass: set every block individually via a comma-separated list (57 for FLUX, 60 for Qwen-Image). |
+| **LoRA Block Sweep Save Grid** | Renders the batched IMAGE output into a labeled grid PNG (block names on Y axis, weights on X axis). Model-agnostic. |
+
+Block tags:
+- **FLUX**: `D00..D18` (double-stream) + `S00..S37` (single-stream) = 57 blocks
+- **Qwen-Image**: `B00..B59` = 60 transformer blocks
 
 `baseline_weight` flips the experiment mode:
 
@@ -122,14 +128,21 @@ sweep targets — they don't have block indices.
 
 See [USAGE.md](USAGE.md) for full workflow recipes.
 
-## Why FLUX-specific?
+## Why per-model adapters?
 
-FLUX's transformer is structurally different from SDXL: 19 double-stream
-blocks then 38 single-stream blocks. Block-wise LoRA loaders built for SDXL's
-U-Net layout don't map cleanly. This node groups LoRA keys by the actual
-FLUX block index using regex on `diffusion_model.double_blocks.{N}.` /
-`diffusion_model.single_blocks.{N}.` so the weights you set match the
-transformer the model actually runs.
+Each DiT model lays its transformer blocks out differently, and block-wise
+LoRA loaders built for SDXL's U-Net don't map cleanly:
+
+- **FLUX**: 19 double-stream blocks (`double_blocks.{N}`) then 38 single-stream
+  blocks (`single_blocks.{N}`). Tags `D00..D18` and `S00..S37`.
+- **Qwen-Image**: 60 single-stream MMDiT blocks (`transformer_blocks.{N}`) with
+  joint image+text attention inside each block. Tags `B00..B59`.
+
+This node groups LoRA keys by the model's actual block index via per-model
+regex on the state-dict keys, so the weights you set match the transformer
+the model actually runs. Adding a new DiT model means writing one small
+`BlockSpec` and four thin subclasses — see `lora_block_sweep/_qwen.py` for
+the template.
 
 ## Citation / inspiration
 
