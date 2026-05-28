@@ -32,11 +32,9 @@ SD1.5/SDXL 的按块加载器（LBW、Bobs Lora Loader）暴露的是 14 个左�
 可以配合 [Efficiency Nodes 的 XY Plot](https://github.com/jags111/efficiency-nodes-comfyui)
 使用，或通过自带的 batch 节点独立运行,不需要外部编排工具。
 
-## Demo:hero 图是怎么做出来的
+## Demo 1 —— FLUX + `alvdansen/frosting_lane_flux`
 
-Hero 图来自一个两阶段实验,LoRA 用的是
-[`alvdansen/frosting_lane_flux`](https://huggingface.co/alvdansen/frosting_lane_flux),
-一个风格化插画 LoRA。
+最上面那张 hero 图来自一个两阶段实验。
 
 **Stage 1 —— 按块扫描。** 把全部 19 个 double block 在权重
 `{0, 0.25, 0.5, 0.75, 1.0}` 下扫一遍,其他块全部保持 `1.0`。共 95 张图。
@@ -48,7 +46,7 @@ MSE。MSE 越大,说明这个块对 LoRA 效果的贡献越大。
 就是上面那张四联图。Stage 1 的 MSE 排序很干净地预测了 Stage 2 的视觉
 效果:关掉顶部 7 个,风格丢失;关掉底部 7 个,毫无损失。
 
-![按块影响力柱状图](docs/impact_chart_d.png)
+![FLUX 按块影响力柱状图](docs/impact_chart_d.png)
 
 |              | 块    | MSE       |
 |--------------|-------|-----------|
@@ -78,9 +76,65 @@ D00 → D01 之间 14× 的差距,正是 hero 的 Bot-7 off 看起来和 Full
 
 复现:
 - [`_dev/full_sweep_D.json`](_dev/full_sweep_D.json) —— Stage 1 API workflow
-- [`_dev/fetch_and_analyze.py`](_dev/fetch_and_analyze.py) —— 下载 + MSE 排名
+- `python _dev/fetch_and_analyze.py <prompt_id>` —— 下载 + MSE 排名
 - [`_dev/build_group_workflow.py`](_dev/build_group_workflow.py) —— 生成 Stage 2 workflow
-- [`_dev/make_hero.py`](_dev/make_hero.py) —— 合成四联 hero 图
+- `python _dev/make_hero.py <prompt_id>` —— 合成四联 hero 图
+
+## Demo 2 —— Qwen-Image + `alfredplpl/qwen-image-modern-anime-lora`
+
+同样的实验流程换到 Qwen-Image + 另一个 LoRA,证明这个方法不是 FLUX 专属。
+
+![Qwen-Image 分组关掉对比:Full / Top-12 off / Bot-12 off / No LoRA](docs/hero_group_qwen.png)
+
+> Qwen-Image 有 60 个 transformer 块。关掉 **MSE 最高的 12 个块**,
+> 这个 modern-anime LoRA 的插画风格被剥离,结果往写实方向回落。关掉
+> **MSE 最低的 12 个块**,视觉上和 Full LoRA 没区别。块数更多,LoRA
+> 信号也分得更散:**Top/Bot MSE 比 = 24×**,而 FLUX 是 14×。
+
+**Stage 1。** 把全部 60 个 transformer 块在权重
+`{0, 0.25, 0.5, 0.75, 1.0}` 下扫一遍,其他块全部保持 `1.0`。
+共 300 张图,768×768,fp8。对每块算 knockout vs full 的 MSE 并排序。
+
+**Stage 2。** 把 MSE 最高的 12 个块一起置零、最低的 12 个一起置零,
+和 Full LoRA、No LoRA 对比。相同 prompt、相同 seed。
+
+![Qwen-Image 按块影响力柱状图](docs/impact_chart_b.png)
+
+|                | 块    | MSE       |
+|----------------|-------|-----------|
+| **关键**       | B29   | 0.00586   |
+|                | B28   | 0.00476   |
+|                | B38   | 0.00430   |
+|                | B31   | 0.00398   |
+|                | B18   | 0.00395   |
+|                | B30   | 0.00353   |
+|                | B16   | 0.00301   |
+|                | B37   | 0.00286   |
+|                | B15   | 0.00229   |
+|                | B19   | 0.00229   |
+|                | B00   | 0.00223   |
+|                | B34   | 0.00211   |
+| **可忽略**     | B11   | 0.00066   |
+|                | B25   | 0.00062   |
+|                | B21   | 0.00061   |
+|                | B09   | 0.00057   |
+|                | B12   | 0.00056   |
+|                | B10   | 0.00055   |
+|                | B56   | 0.00045   |
+|                | B24   | 0.00041   |
+|                | B05   | 0.00031   |
+|                | B06   | 0.00028   |
+|                | B07   | 0.00025   |
+|                | B50   | 0.00024   |
+
+完整 60 行排名:[docs/impact_ranking_b.txt](docs/impact_ranking_b.txt)。
+完整 60×5 标注网格(约 950 KB JPEG):[docs/grid_preview_b.jpg](docs/grid_preview_b.jpg)。
+
+复现(Qwen 变体):
+- [`_dev/full_sweep_B.json`](_dev/full_sweep_B.json) —— Stage 1 API workflow
+- `python _dev/fetch_and_analyze.py <prompt_id> --model qwen` —— 下载 + MSE 排名
+- [`_dev/build_group_workflow_qwen.py`](_dev/build_group_workflow_qwen.py) —— 生成 Stage 2 workflow
+- `python _dev/make_hero.py <prompt_id> --model qwen` —— 合成四联 hero 图
 
 ## 安装
 

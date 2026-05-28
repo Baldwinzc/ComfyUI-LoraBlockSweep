@@ -35,11 +35,9 @@ style.
 Pairs with [Efficiency Nodes' XY Plot](https://github.com/jags111/efficiency-nodes-comfyui)
 or runs standalone via the batch node — no external orchestration required.
 
-## Demo: how the hero was produced
+## Demo 1 — FLUX with `alvdansen/frosting_lane_flux`
 
-The hero is built from a two-stage experiment with
-[`alvdansen/frosting_lane_flux`](https://huggingface.co/alvdansen/frosting_lane_flux),
-a stylized illustration LoRA.
+A two-stage experiment that builds the hero at the top of this README.
 
 **Stage 1 — per-block sweep.** Sweep all 19 double blocks at weights
 `{0, 0.25, 0.5, 0.75, 1.0}` while every other block stays at `1.0`. That's
@@ -54,7 +52,7 @@ above. The MSE ranking from Stage 1 turns out to predict the visual outcome
 of Stage 2 cleanly: kill the top 7, lose the style; kill the bottom 7, lose
 nothing.
 
-![Per-block impact bar chart](docs/impact_chart_d.png)
+![Per-block impact bar chart (FLUX)](docs/impact_chart_d.png)
 
 |         | Block | MSE       |
 |---------|-------|-----------|
@@ -84,9 +82,66 @@ labeled grid lives in [docs/grid_preview_d.png](docs/grid_preview_d.png).
 
 Reproduce:
 - [`_dev/full_sweep_D.json`](_dev/full_sweep_D.json) — Stage 1 API workflow
-- [`_dev/fetch_and_analyze.py`](_dev/fetch_and_analyze.py) — downloader + MSE ranking
+- `python _dev/fetch_and_analyze.py <prompt_id>` — downloader + MSE ranking
 - [`_dev/build_group_workflow.py`](_dev/build_group_workflow.py) — generate the Stage 2 workflow
-- [`_dev/make_hero.py`](_dev/make_hero.py) — compose the 4-up hero
+- `python _dev/make_hero.py <prompt_id>` — compose the 4-up hero
+
+## Demo 2 — Qwen-Image with `alfredplpl/qwen-image-modern-anime-lora`
+
+Same recipe, different DiT model, different LoRA — to show the technique
+isn't FLUX-specific.
+
+![Group knockout (Qwen-Image): Full / Top-12 off / Bot-12 off / No LoRA](docs/hero_group_qwen.png)
+
+> Qwen-Image has 60 transformer blocks. Knocking out the **12 highest-MSE
+> blocks** strips the LoRA's modern-anime style — the result falls back
+> toward a photographic look. Knocking out the **12 lowest-MSE blocks** is
+> visually indistinguishable from Full LoRA. With more blocks Qwen spreads
+> the LoRA signal further: **top/bottom MSE ratio = 24×** vs FLUX's 14×.
+
+**Stage 1.** Sweep all 60 transformer blocks at `{0, 0.25, 0.5, 0.75, 1.0}`,
+others held at `1.0`. 300 images, 768×768, fp8. MSE-rank knockout vs full.
+
+**Stage 2.** Zero the top-12 vs bot-12 MSE blocks as two groups; compare
+against Full LoRA and No LoRA. Same prompt, same seed.
+
+![Per-block impact bar chart (Qwen-Image)](docs/impact_chart_b.png)
+
+|                | Block | MSE       |
+|----------------|-------|-----------|
+| **Critical**   | B29   | 0.00586   |
+|                | B28   | 0.00476   |
+|                | B38   | 0.00430   |
+|                | B31   | 0.00398   |
+|                | B18   | 0.00395   |
+|                | B30   | 0.00353   |
+|                | B16   | 0.00301   |
+|                | B37   | 0.00286   |
+|                | B15   | 0.00229   |
+|                | B19   | 0.00229   |
+|                | B00   | 0.00223   |
+|                | B34   | 0.00211   |
+| **Negligible** | B11   | 0.00066   |
+|                | B25   | 0.00062   |
+|                | B21   | 0.00061   |
+|                | B09   | 0.00057   |
+|                | B12   | 0.00056   |
+|                | B10   | 0.00055   |
+|                | B56   | 0.00045   |
+|                | B24   | 0.00041   |
+|                | B05   | 0.00031   |
+|                | B06   | 0.00028   |
+|                | B07   | 0.00025   |
+|                | B50   | 0.00024   |
+
+Full 60-row ranking: [docs/impact_ranking_b.txt](docs/impact_ranking_b.txt).
+Full 60×5 labeled grid (~950 KB JPEG): [docs/grid_preview_b.jpg](docs/grid_preview_b.jpg).
+
+Reproduce (Qwen variant):
+- [`_dev/full_sweep_B.json`](_dev/full_sweep_B.json) — Stage 1 API workflow
+- `python _dev/fetch_and_analyze.py <prompt_id> --model qwen` — downloader + MSE ranking
+- [`_dev/build_group_workflow_qwen.py`](_dev/build_group_workflow_qwen.py) — generate the Stage 2 workflow
+- `python _dev/make_hero.py <prompt_id> --model qwen` — compose the 4-up hero
 
 ## Install
 
