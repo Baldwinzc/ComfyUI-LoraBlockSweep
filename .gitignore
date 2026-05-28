@@ -8,4 +8,9 @@ __pycache__/
 # Local experiment scratch — heavy PNGs, raw cell dumps.
 _dev/sweep_*_results/
 _dev/smoke_test_output.png
+_dev/qwen_validation/
+_dev/sd35_validation/
+
+# Local build artifacts
+node.zip
 
