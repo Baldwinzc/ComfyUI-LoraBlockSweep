@@ -161,6 +161,45 @@ B00,B05,B10,B15,B20,B25,B30,B35,B40,B45,B50,B55
 12 × 5 = 60 images. Once you see which neighbourhood the action is in,
 zoom in with the Group node on contiguous ranges (e.g. `B20-B29`).
 
+## SD3.5 Large
+
+SD3.5 Large has 38 MMDiT joint blocks (tags `J00..J37`). Every SD3.5 node
+mirrors the FLUX/Qwen node above — swap to `(SD3.5 Large)` and use
+`J00..J37`.
+
+```
+CheckpointLoaderSimple ─→ model + vae (Stable Diffusion 3.5 Large.safetensors)
+TripleCLIPLoader       ─→ clip  (clip_l + clip_g + t5xxl_fp16)
+CLIPTextEncode         ─→ positive / negative
+EmptySD3LatentImage    ─→ latent_image  (1024×1024 recommended)
+                          lora_name = <your_sd35_lora>.safetensors
+                          block_list = J00,J01,...,J37  (or a subset)
+                          value_list = 0,0.25,0.5,0.75,1.0
+                          baseline_weight = 1.0 (knock-out) | 0.0 (solo)
+                          cfg = 4.5, sampler = euler, scheduler = sgm_uniform, steps = 20
+
+images out ─→ LoRA Block Sweep Save Grid   (labeled grid PNG)
+           └→ SaveImage                    (also keeps individual cells)
+```
+
+For an Efficiency XY Plot setup, paste all 38 J tags as the X-axis values:
+
+```
+J00,J01,J02,J03,J04,J05,J06,J07,J08,J09,J10,J11,J12,J13,J14,J15,J16,J17,J18,J19,J20,J21,J22,J23,J24,J25,J26,J27,J28,J29,J30,J31,J32,J33,J34,J35,J36,J37
+```
+
+### First-round recipe (SD3.5)
+
+38 × 5 = 190 images runs in ~50 min on an H-class GPU at 1024². For a
+faster first pass, pick every 4th block:
+
+```
+J00,J04,J08,J12,J16,J20,J24,J28,J32,J36
+```
+
+10 × 5 = 50 images. After spotting the active neighbourhood, expand with
+the Group node (e.g. `J20-J30`).
+
 ## Tips
 
 - **Fix the seed.** The grid is meaningless if the only variable isn't block weight.

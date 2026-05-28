@@ -154,6 +154,45 @@ B00,B05,B10,B15,B20,B25,B30,B35,B40,B45,B50,B55
 12 × 5 = 60 张图。看出 action 集中在哪一段之后，用 Group 节点对那段
 连续范围（如 `B20-B29`）做细化。
 
+## SD3.5 Large
+
+SD3.5 Large 有 38 个 MMDiT joint block（标签 `J00..J37`）。所有 SD3.5
+节点和上面 FLUX/Qwen 版本一一对应 —— 节点名换成 `(SD3.5 Large)`，块
+标签用 `J00..J37` 即可。
+
+```
+CheckpointLoaderSimple ─→ model + vae（Stable Diffusion 3.5 Large.safetensors）
+TripleCLIPLoader       ─→ clip（clip_l + clip_g + t5xxl_fp16）
+CLIPTextEncode         ─→ positive / negative
+EmptySD3LatentImage    ─→ latent_image（推荐 1024×1024）
+                          lora_name = <your_sd35_lora>.safetensors
+                          block_list = J00,J01,...,J37（或子集）
+                          value_list = 0,0.25,0.5,0.75,1.0
+                          baseline_weight = 1.0 (knock-out) | 0.0 (solo)
+                          cfg = 4.5, sampler = euler, scheduler = sgm_uniform, steps = 20
+
+images out ─→ LoRA Block Sweep Save Grid   （标注网格 PNG）
+           └→ SaveImage                    （也保留单独的格子）
+```
+
+配 Efficiency XY Plot 用的话，X 轴粘贴 38 个 J 标签：
+
+```
+J00,J01,J02,J03,J04,J05,J06,J07,J08,J09,J10,J11,J12,J13,J14,J15,J16,J17,J18,J19,J20,J21,J22,J23,J24,J25,J26,J27,J28,J29,J30,J31,J32,J33,J34,J35,J36,J37
+```
+
+### 第一轮推荐配方（SD3.5）
+
+38 × 5 = 190 张图在 H 卡 1024² 下大约 50 分钟。想更快拿到首轮信号，
+每 4 块取一个：
+
+```
+J00,J04,J08,J12,J16,J20,J24,J28,J32,J36
+```
+
+10 × 5 = 50 张图。看出 action 在哪一段之后，用 Group 节点对那段
+（如 `J20-J30`）做细化。
+
 ## 小贴士
 
 - **固定 seed。** 如果唯一变量不是块权重，这张网格就没意义了。

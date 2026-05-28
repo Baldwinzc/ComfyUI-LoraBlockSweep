@@ -1,0 +1,70 @@
+{
+  "1": {
+    "class_type": "CheckpointLoaderSimple",
+    "inputs": {
+      "ckpt_name": "Stable Diffusion 3.5 Large.safetensors"
+    }
+  },
+  "1b": {
+    "class_type": "TripleCLIPLoader",
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "clip_g.safetensors",
+      "clip_name3": "t5xxl_fp16.safetensors"
+    }
+  },
+  "2": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "anime portrait of a young woman with brown bob hair and blue eyes, head and shoulders, soft lighting, pastel background",
+      "clip": ["1b", 0]
+    }
+  },
+  "3": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "photo, blurry, low quality",
+      "clip": ["1b", 0]
+    }
+  },
+  "4": {
+    "class_type": "EmptySD3LatentImage",
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    }
+  },
+  "5": {
+    "class_type": "LoraBlockSweepSD35Batch",
+    "inputs": {
+      "model": ["1", 0],
+      "vae": ["1", 2],
+      "lora_name": "sd35-large-anime.safetensors",
+      "positive": ["2", 0],
+      "negative": ["3", 0],
+      "latent_image": ["4", 0],
+      "seed": 42,
+      "steps": 20,
+      "cfg": 4.5,
+      "sampler_name": "euler",
+      "scheduler": "sgm_uniform",
+      "denoise": 1.0,
+      "block_list": "J00",
+      "value_list": "1.0",
+      "baseline_weight": 1.0
+    }
+  },
+  "6": {
+    "class_type": "LoraBlockSweepSaveGrid",
+    "inputs": {
+      "images": ["5", 0],
+      "blocks": "J00",
+      "values": "1.0",
+      "filename_prefix": "smoke_sd35",
+      "label_size": 36,
+      "pad": 16,
+      "compress_level": 4
+    }
+  }
+}
