@@ -9,6 +9,9 @@ Usage:
   # Qwen-Image full sweep
   python fetch_and_analyze.py <prompt_id> --model qwen
 
+  # SD3.5 Large full sweep
+  python fetch_and_analyze.py <prompt_id> --model sd35
+
   # explicit overrides
   python fetch_and_analyze.py <prompt_id> --prefix B --count 60 \
       --out-dir sweep_B_results --grid-node 9 --cell-node 10
@@ -33,6 +36,8 @@ PRESETS = {
                  grid_node="8", cell_node="9"),
     "qwen": dict(prefix="B", count=60, out_dir="sweep_B_results",
                  grid_node="9", cell_node="10"),
+    "sd35": dict(prefix="J", count=38, out_dir="sweep_J_results",
+                 grid_node="6", cell_node="7"),
 }
 VALUES = [0.0, 0.25, 0.5, 0.75, 1.0]
 

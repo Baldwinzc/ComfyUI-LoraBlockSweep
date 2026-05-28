@@ -6,6 +6,7 @@ side-by-side with labels, and writes hero_group.png.
 Usage:
   python make_hero.py <prompt_id>                  # FLUX (default, backward compat)
   python make_hero.py <prompt_id> --model qwen     # Qwen-Image
+  python make_hero.py <prompt_id> --model sd35     # SD3.5 Large
 SERVER env var overrides default ComfyUI URL.
 """
 import argparse
@@ -46,6 +47,20 @@ PRESETS = {
         caption=("Qwen-Image: same seed, same prompt. Knocking out the highest-MSE "
                  "B blocks (Top-N off) strips most of the modern-anime LoRA's style. "
                  "Knocking out the same number of lowest-MSE B blocks (Bot-N off) "
+                 "is visually indistinguishable from Full."),
+    ),
+    "sd35": dict(
+        results_dir="sweep_J_results",
+        out_name="hero_group_sd35.png",
+        branches=[
+            ("15", "full", "Full LoRA",     "all 38 J blocks @ 1.0"),
+            ("25", "top",  "Top-N off",     "highest-MSE J blocks -> 0"),
+            ("35", "bot",  "Bot-N off",     "lowest-MSE J blocks -> 0"),
+            ("45", "none", "No LoRA",       "all 38 J blocks @ 0"),
+        ],
+        caption=("SD3.5 Large: same seed, same prompt. Knocking out the highest-MSE "
+                 "J blocks (Top-N off) strips most of the anime LoRA's style. "
+                 "Knocking out the same number of lowest-MSE J blocks (Bot-N off) "
                  "is visually indistinguishable from Full."),
     ),
 }

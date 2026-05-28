@@ -7,10 +7,12 @@
 [![ComfyUI](https://img.shields.io/badge/ComfyUI-custom%20node-success)](https://github.com/comfyanonymous/ComfyUI)
 [![Model: FLUX](https://img.shields.io/badge/model-FLUX-orange)](https://blackforestlabs.ai/)
 [![Model: Qwen-Image](https://img.shields.io/badge/model-Qwen--Image-purple)](https://github.com/QwenLM/Qwen-Image)
+[![Model: SD3.5](https://img.shields.io/badge/model-SD3.5%20Large-blue)](https://stability.ai/news/introducing-stable-diffusion-3-5)
 
 为 DiT 系列模型提供按块（per-block）的 LoRA 权重控制 —— **FLUX**（19 个
-double + 38 个 single = 57 块）和 **Qwen-Image**（60 个 transformer 块）。
-独立设置每块强度，从标注网格里直接读出每块的影响。
+double + 38 个 single = 57 块）、**Qwen-Image**（60 个 transformer 块）和
+**SD3.5 Large**（38 个 joint block）。独立设置每块强度，从标注网格里直接
+读出每块的影响。
 
 ![分组关掉对比：Full / Top-7 off / Bot-7 off / No LoRA](docs/hero_group.png)
 
@@ -25,9 +27,9 @@ double + 38 个 single = 57 块）和 **Qwen-Image**（60 个 transformer 块）
 
 大多数 LoRA 加载器只接受一个 `strength` 标量，对整个 adapter 生效。
 SD1.5/SDXL 的按块加载器（LBW、Bobs Lora Loader）暴露的是 14 个左右的
-概念块组。**本节点暴露的是 FLUX 真实的 57 个 transformer block**，
-按块扫一遍就能拿到清晰的逐层信号 —— 哪些块重要、哪些是死重、哪些
-可以调低而不丢风格。
+概念块组。**本节点暴露的是 DiT 真实的 transformer block**（FLUX 57 个、
+Qwen-Image 60 个、SD3.5 Large 38 个），按块扫一遍就能拿到清晰的逐层
+信号 —— 哪些块重要、哪些是死重、哪些可以调低而不丢风格。
 
 可以配合 [Efficiency Nodes 的 XY Plot](https://github.com/jags111/efficiency-nodes-comfyui)
 使用，或通过自带的 batch 节点独立运行,不需要外部编排工具。
@@ -136,6 +138,65 @@ D00 → D01 之间 14× 的差距,正是 hero 的 Bot-7 off 看起来和 Full
 - [`_dev/build_group_workflow_qwen.py`](_dev/build_group_workflow_qwen.py) —— 生成 Stage 2 workflow
 - `python _dev/make_hero.py <prompt_id> --model qwen` —— 合成四联 hero 图
 
+## Demo 3 —— SD3.5 Large + `prithivMLmods/SD3.5-Large-Anime-LoRA`
+
+第三个 DiT、第三种架构 —— SD3.5 Large 的 38 个 MMDiT `joint_blocks`，每块
+内部分成 `context_block`（文本）与 `x_block`（图像）两半，共享联合注意力。
+
+![SD3.5 Large 分组关掉对比:Full / Top-12 off / Bot-12 off / No LoRA](docs/hero_group_sd35.png)
+
+> 同样的实验。关掉 **MSE 最低的 12 个块**（Bot-12 off），视觉上和 Full
+> LoRA 没区别 —— 12 个死重块确认。关掉 **MSE 最高的 12 个块**（Top-12
+> off），结果明显变了 —— 构图坍缩（户外云景退化为纯背景）、风格变柔，
+> 但**没有**完全回退到 No-LoRA 的样子。SD3.5 的 joint block 比 FLUX 的
+> double-stream 更冗余地承载 LoRA 信号：只关掉头部一组还不足以剥离风格。
+> **Top/Bot MSE 比 = 47×**，是三个 demo 里差距最大的。
+
+**Stage 1。** 把全部 38 个 joint block 在权重 `{0, 0.25, 0.5, 0.75, 1.0}`
+下扫一遍，其他块全部保持 `1.0`。共 190 张图，1024×1024。对每块算
+knockout vs full 的 MSE 并排序。
+
+**Stage 2。** 把 MSE 最高的 12 个块一起置零、最低的 12 个一起置零，和
+Full LoRA、No LoRA 对比。相同 prompt、相同 seed。
+
+![SD3.5 Large 按块影响力柱状图](docs/impact_chart_j.png)
+
+|                | 块    | MSE      |
+|----------------|-------|----------|
+| **关键**       | J07   | 0.00952  |
+|                | J24   | 0.00666  |
+|                | J26   | 0.00634  |
+|                | J21   | 0.00622  |
+|                | J30   | 0.00615  |
+|                | J22   | 0.00609  |
+|                | J00   | 0.00568  |
+|                | J20   | 0.00551  |
+|                | J25   | 0.00546  |
+|                | J09   | 0.00484  |
+|                | J01   | 0.00479  |
+|                | J19   | 0.00476  |
+| **可忽略**     | J37   | 0.00242  |
+|                | J02   | 0.00234  |
+|                | J34   | 0.00233  |
+|                | J12   | 0.00211  |
+|                | J14   | 0.00185  |
+|                | J06   | 0.00123  |
+|                | J13   | 0.00115  |
+|                | J36   | 0.00096  |
+|                | J08   | 0.00094  |
+|                | J05   | 0.00059  |
+|                | J35   | 0.00040  |
+|                | J10   | 0.00021  |
+
+完整 38 行排名：[docs/impact_ranking_j.txt](docs/impact_ranking_j.txt)。
+完整 38×5 标注网格（约 950 KB JPEG）：[docs/grid_preview_j.jpg](docs/grid_preview_j.jpg)。
+
+复现（SD3.5 变体）：
+- [`_dev/full_sweep_J.json`](_dev/full_sweep_J.json) —— Stage 1 API workflow
+- `python _dev/fetch_and_analyze.py <prompt_id> --model sd35` —— 下载 + MSE 排名
+- [`_dev/build_group_workflow_sd35.py`](_dev/build_group_workflow_sd35.py) —— 生成 Stage 2 workflow
+- `python _dev/make_hero.py <prompt_id> --model sd35` —— 合成四联 hero 图
+
 ## 安装
 
 **通过 [ComfyUI-Manager](https://github.com/ltdrdata/ComfyUI-Manager)(待收录后)**:
@@ -156,15 +217,16 @@ git clone https://github.com/Baldwinzc/ComfyUI-LoraBlockSweep.git
 
 | 节点 | 适用场景 |
 |------|----------|
-| **LoRA Block Sweep (FLUX)** / **(Qwen-Image)** | 可直接替换 `LoraLoader`,一次一个块 × 一个值。配 Efficiency XY Plot 跑网格扫描。 |
-| **LoRA Block Sweep Batch (FLUX)** / **(Qwen-Image)** | 一体式:内部循环 `(block, value)`、逐个采样、返回 batched IMAGE。不需要 XY plot。上面 demo 用的就是 FLUX 版本。 |
-| **LoRA Block Sweep Group (FLUX)** / **(Qwen-Image)** | 对**块组**扫描(比如 `D00-D06`、`B10-B19`),适合大致定位之后做细化。 |
-| **LoRA Block Sweep Custom (FLUX)** / **(Qwen-Image)** | 终极调试:通过逗号分隔列表单独设置每一个块(FLUX 57 个,Qwen-Image 60 个)。 |
+| **LoRA Block Sweep (FLUX)** / **(Qwen-Image)** / **(SD3.5 Large)** | 可直接替换 `LoraLoader`,一次一个块 × 一个值。配 Efficiency XY Plot 跑网格扫描。 |
+| **LoRA Block Sweep Batch (FLUX)** / **(Qwen-Image)** / **(SD3.5 Large)** | 一体式:内部循环 `(block, value)`、逐个采样、返回 batched IMAGE。不需要 XY plot。上面 demo 用的就是这一类节点。 |
+| **LoRA Block Sweep Group (FLUX)** / **(Qwen-Image)** / **(SD3.5 Large)** | 对**块组**扫描(比如 `D00-D06`、`B10-B19`、`J00-J09`),适合大致定位之后做细化。 |
+| **LoRA Block Sweep Custom (FLUX)** / **(Qwen-Image)** / **(SD3.5 Large)** | 终极调试:通过逗号分隔列表单独设置每一个块(FLUX 57 个,Qwen-Image 60 个,SD3.5 38 个)。 |
 | **LoRA Block Sweep Save Grid** | 把 batched IMAGE 输出渲染成标注网格 PNG(Y 轴块名、X 轴权重)。模型无关。 |
 
 块标签:
 - **FLUX**:`D00..D18`(double-stream)+ `S00..S37`(single-stream)= 57 块
 - **Qwen-Image**:`B00..B59` = 60 个 transformer 块
+- **SD3.5 Large**:`J00..J37` = 38 个 joint block(MMDiT 内含 context + image 两半)
 
 `baseline_weight` 决定实验模式:
 
@@ -186,11 +248,14 @@ LoRA 加载器映射不过来:
   single-stream 块(`single_blocks.{N}`)。标签 `D00..D18` 和 `S00..S37`。
 - **Qwen-Image**:60 个 single-stream MMDiT 块(`transformer_blocks.{N}`),
   每块内部做图文联合注意力。标签 `B00..B59`。
+- **SD3.5 Large**:38 个 MMDiT joint block(`joint_blocks.{N}`),每块内部
+  分成 `context_block`(文本)和 `x_block`(图像)两半,共享联合注意力。
+  标签 `J00..J37`。
 
 本节点按各自模型的真实块索引,通过正则匹配 state_dict key 来分组 LoRA
 权重,确保你设的强度对应模型实际跑的 transformer。新增一个 DiT 模型
-只需写一个 `BlockSpec` 加 4 个薄子类 —— 模板见
-`lora_block_sweep/_qwen.py`。
+只需写一个 `BlockSpec` 加 4 个薄子类 —— 最简单的模板见
+`lora_block_sweep/_sd35.py`。
 
 ## 致谢 / 灵感来源
 

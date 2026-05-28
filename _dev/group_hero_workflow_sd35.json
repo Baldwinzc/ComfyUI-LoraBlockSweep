@@ -1,0 +1,312 @@
+{
+  "1": {
+    "class_type": "CheckpointLoaderSimple",
+    "inputs": {
+      "ckpt_name": "Stable Diffusion 3.5 Large.safetensors"
+    }
+  },
+  "1b": {
+    "class_type": "TripleCLIPLoader",
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "clip_g.safetensors",
+      "clip_name3": "t5xxl_fp16.safetensors"
+    }
+  },
+  "5": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "anime portrait of a young woman with brown bob hair and blue eyes, head and shoulders, soft lighting, pastel background",
+      "clip": [
+        "1b",
+        0
+      ]
+    }
+  },
+  "6": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "photo, blurry, low quality",
+      "clip": [
+        "1b",
+        0
+      ]
+    }
+  },
+  "7": {
+    "class_type": "EmptySD3LatentImage",
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    }
+  },
+  "10": {
+    "class_type": "LoraBlockSweepSD35Custom",
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "clip": [
+        "1b",
+        0
+      ],
+      "lora_name": "sd35-large-anime.safetensors",
+      "weights": "1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1",
+      "baseline_weight": 1.0,
+      "clip_strength": 1.0
+    }
+  },
+  "13": {
+    "class_type": "KSampler",
+    "inputs": {
+      "model": [
+        "10",
+        0
+      ],
+      "positive": [
+        "5",
+        0
+      ],
+      "negative": [
+        "6",
+        0
+      ],
+      "latent_image": [
+        "7",
+        0
+      ],
+      "seed": 42,
+      "steps": 20,
+      "cfg": 4.5,
+      "sampler_name": "euler",
+      "scheduler": "sgm_uniform",
+      "denoise": 1.0
+    }
+  },
+  "14": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "13",
+        0
+      ],
+      "vae": [
+        "1",
+        2
+      ]
+    }
+  },
+  "15": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "images": [
+        "14",
+        0
+      ],
+      "filename_prefix": "lbw_sd35_group_full"
+    }
+  },
+  "20": {
+    "class_type": "LoraBlockSweepSD35Custom",
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "clip": [
+        "1b",
+        0
+      ],
+      "lora_name": "sd35-large-anime.safetensors",
+      "weights": "0,0,1,1,1,1,1,0,1,0,1,1,1,1,1,1,1,1,1,0,0,0,0,1,0,0,0,1,1,1,0,1,1,1,1,1,1,1",
+      "baseline_weight": 1.0,
+      "clip_strength": 1.0
+    }
+  },
+  "23": {
+    "class_type": "KSampler",
+    "inputs": {
+      "model": [
+        "20",
+        0
+      ],
+      "positive": [
+        "5",
+        0
+      ],
+      "negative": [
+        "6",
+        0
+      ],
+      "latent_image": [
+        "7",
+        0
+      ],
+      "seed": 42,
+      "steps": 20,
+      "cfg": 4.5,
+      "sampler_name": "euler",
+      "scheduler": "sgm_uniform",
+      "denoise": 1.0
+    }
+  },
+  "24": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "23",
+        0
+      ],
+      "vae": [
+        "1",
+        2
+      ]
+    }
+  },
+  "25": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "images": [
+        "24",
+        0
+      ],
+      "filename_prefix": "lbw_sd35_group_top"
+    }
+  },
+  "30": {
+    "class_type": "LoraBlockSweepSD35Custom",
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "clip": [
+        "1b",
+        0
+      ],
+      "lora_name": "sd35-large-anime.safetensors",
+      "weights": "1,1,0,1,1,0,0,1,0,1,0,1,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0",
+      "baseline_weight": 1.0,
+      "clip_strength": 1.0
+    }
+  },
+  "33": {
+    "class_type": "KSampler",
+    "inputs": {
+      "model": [
+        "30",
+        0
+      ],
+      "positive": [
+        "5",
+        0
+      ],
+      "negative": [
+        "6",
+        0
+      ],
+      "latent_image": [
+        "7",
+        0
+      ],
+      "seed": 42,
+      "steps": 20,
+      "cfg": 4.5,
+      "sampler_name": "euler",
+      "scheduler": "sgm_uniform",
+      "denoise": 1.0
+    }
+  },
+  "34": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "33",
+        0
+      ],
+      "vae": [
+        "1",
+        2
+      ]
+    }
+  },
+  "35": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "images": [
+        "34",
+        0
+      ],
+      "filename_prefix": "lbw_sd35_group_bot"
+    }
+  },
+  "40": {
+    "class_type": "LoraBlockSweepSD35Custom",
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "clip": [
+        "1b",
+        0
+      ],
+      "lora_name": "sd35-large-anime.safetensors",
+      "weights": "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0",
+      "baseline_weight": 1.0,
+      "clip_strength": 1.0
+    }
+  },
+  "43": {
+    "class_type": "KSampler",
+    "inputs": {
+      "model": [
+        "40",
+        0
+      ],
+      "positive": [
+        "5",
+        0
+      ],
+      "negative": [
+        "6",
+        0
+      ],
+      "latent_image": [
+        "7",
+        0
+      ],
+      "seed": 42,
+      "steps": 20,
+      "cfg": 4.5,
+      "sampler_name": "euler",
+      "scheduler": "sgm_uniform",
+      "denoise": 1.0
+    }
+  },
+  "44": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "43",
+        0
+      ],
+      "vae": [
+        "1",
+        2
+      ]
+    }
+  },
+  "45": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "images": [
+        "44",
+        0
+      ],
+      "filename_prefix": "lbw_sd35_group_none"
+    }
+  }
+}

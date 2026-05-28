@@ -7,11 +7,12 @@
 [![ComfyUI](https://img.shields.io/badge/ComfyUI-custom%20node-success)](https://github.com/comfyanonymous/ComfyUI)
 [![Model: FLUX](https://img.shields.io/badge/model-FLUX-orange)](https://blackforestlabs.ai/)
 [![Model: Qwen-Image](https://img.shields.io/badge/model-Qwen--Image-purple)](https://github.com/QwenLM/Qwen-Image)
+[![Model: SD3.5](https://img.shields.io/badge/model-SD3.5%20Large-blue)](https://stability.ai/news/introducing-stable-diffusion-3-5)
 
 Per-block LoRA weighting for DiT models — **FLUX** (19 double + 38 single
-= 57 blocks) and **Qwen-Image** (60 transformer blocks). Sweep each block's
-strength independently and read the impact of every block straight off a
-labeled grid.
+= 57 blocks), **Qwen-Image** (60 transformer blocks) and **SD3.5 Large**
+(38 joint blocks). Sweep each block's strength independently and read the
+impact of every block straight off a labeled grid.
 
 ![Group knockout: Full / Top-7 off / Bot-7 off / No LoRA](docs/hero_group.png)
 
@@ -27,10 +28,10 @@ labeled grid.
 
 Most LoRA loaders take a single `strength` scalar that applies to the whole
 adapter. Block-wise loaders for SD1.5/SDXL (LBW, Bobs Lora Loader) expose ~14
-conceptual block groups. **This exposes FLUX's actual 57 transformer blocks**,
-so a single-block sweep gives you a clean per-layer signal — which blocks
-matter, which are dead weight, which you can dial down without losing the
-style.
+conceptual block groups. **This exposes the DiT's actual transformer blocks**
+(57 for FLUX, 60 for Qwen-Image, 38 for SD3.5 Large), so a single-block sweep
+gives you a clean per-layer signal — which blocks matter, which are dead
+weight, which you can dial down without losing the style.
 
 Pairs with [Efficiency Nodes' XY Plot](https://github.com/jags111/efficiency-nodes-comfyui)
 or runs standalone via the batch node — no external orchestration required.
@@ -143,6 +144,68 @@ Reproduce (Qwen variant):
 - [`_dev/build_group_workflow_qwen.py`](_dev/build_group_workflow_qwen.py) — generate the Stage 2 workflow
 - `python _dev/make_hero.py <prompt_id> --model qwen` — compose the 4-up hero
 
+## Demo 3 — SD3.5 Large with `prithivMLmods/SD3.5-Large-Anime-LoRA`
+
+Third DiT, third architecture — SD3.5 Large's 38 MMDiT `joint_blocks` (each
+with `context_block` for text and `x_block` for image, sharing joint
+attention).
+
+![Group knockout (SD3.5 Large): Full / Top-12 off / Bot-12 off / No LoRA](docs/hero_group_sd35.png)
+
+> Same recipe. Knocking out the **12 lowest-MSE blocks** (Bot-12 off) is
+> visually indistinguishable from Full LoRA — 12 dead-weight blocks confirmed.
+> Knocking out the **12 highest-MSE blocks** (Top-12 off) shifts the result
+> noticeably — composition collapses (the outdoor cloud scene flattens to a
+> plain background) and the style softens — but doesn't fully revert to the
+> No-LoRA look. SD3.5's joint blocks carry the LoRA signal more redundantly
+> than FLUX's double-stream stack: a single top group isn't enough to strip
+> the style. **Top/bottom MSE ratio = 47×**, the most extreme of the three
+> demos.
+
+**Stage 1.** Sweep all 38 joint blocks at `{0, 0.25, 0.5, 0.75, 1.0}`, others
+held at `1.0`. 190 images, 1024×1024. MSE-rank knockout vs full.
+
+**Stage 2.** Zero the top-12 vs bot-12 MSE blocks as two groups; compare
+against Full LoRA and No LoRA. Same prompt, same seed.
+
+![Per-block impact bar chart (SD3.5 Large)](docs/impact_chart_j.png)
+
+|                | Block | MSE      |
+|----------------|-------|----------|
+| **Critical**   | J07   | 0.00952  |
+|                | J24   | 0.00666  |
+|                | J26   | 0.00634  |
+|                | J21   | 0.00622  |
+|                | J30   | 0.00615  |
+|                | J22   | 0.00609  |
+|                | J00   | 0.00568  |
+|                | J20   | 0.00551  |
+|                | J25   | 0.00546  |
+|                | J09   | 0.00484  |
+|                | J01   | 0.00479  |
+|                | J19   | 0.00476  |
+| **Negligible** | J37   | 0.00242  |
+|                | J02   | 0.00234  |
+|                | J34   | 0.00233  |
+|                | J12   | 0.00211  |
+|                | J14   | 0.00185  |
+|                | J06   | 0.00123  |
+|                | J13   | 0.00115  |
+|                | J36   | 0.00096  |
+|                | J08   | 0.00094  |
+|                | J05   | 0.00059  |
+|                | J35   | 0.00040  |
+|                | J10   | 0.00021  |
+
+Full 38-row ranking: [docs/impact_ranking_j.txt](docs/impact_ranking_j.txt).
+Full 38×5 labeled grid (~950 KB JPEG): [docs/grid_preview_j.jpg](docs/grid_preview_j.jpg).
+
+Reproduce (SD3.5 variant):
+- [`_dev/full_sweep_J.json`](_dev/full_sweep_J.json) — Stage 1 API workflow
+- `python _dev/fetch_and_analyze.py <prompt_id> --model sd35` — downloader + MSE ranking
+- [`_dev/build_group_workflow_sd35.py`](_dev/build_group_workflow_sd35.py) — generate the Stage 2 workflow
+- `python _dev/make_hero.py <prompt_id> --model sd35` — compose the 4-up hero
+
 ## Install
 
 **Via [ComfyUI-Manager](https://github.com/ltdrdata/ComfyUI-Manager)** (when listed): search "LoraBlockSweep" → Install.
@@ -162,15 +225,16 @@ Dependencies (`numpy`, `Pillow`, `torch`) are already pulled in by ComfyUI.
 
 | Node | Use when |
 |------|----------|
-| **LoRA Block Sweep (FLUX)** / **(Qwen-Image)** | Drop-in `LoraLoader` replacement, one block × one value. Wire to Efficiency XY Plot for grid sweeps. |
-| **LoRA Block Sweep Batch (FLUX)** / **(Qwen-Image)** | All-in-one: loops over `(block, value)` internally, samples each, returns a batched IMAGE. No XY plot needed. Used in the demo above. |
-| **LoRA Block Sweep Group (FLUX)** / **(Qwen-Image)** | Sweep *grouped* blocks (e.g. `D00-D06`, `B10-B19`) once you've narrowed down where the action is. |
-| **LoRA Block Sweep Custom (FLUX)** / **(Qwen-Image)** | Final pass: set every block individually via a comma-separated list (57 for FLUX, 60 for Qwen-Image). |
+| **LoRA Block Sweep (FLUX)** / **(Qwen-Image)** / **(SD3.5 Large)** | Drop-in `LoraLoader` replacement, one block × one value. Wire to Efficiency XY Plot for grid sweeps. |
+| **LoRA Block Sweep Batch (FLUX)** / **(Qwen-Image)** / **(SD3.5 Large)** | All-in-one: loops over `(block, value)` internally, samples each, returns a batched IMAGE. No XY plot needed. Used in the demos above. |
+| **LoRA Block Sweep Group (FLUX)** / **(Qwen-Image)** / **(SD3.5 Large)** | Sweep *grouped* blocks (e.g. `D00-D06`, `B10-B19`, `J00-J09`) once you've narrowed down where the action is. |
+| **LoRA Block Sweep Custom (FLUX)** / **(Qwen-Image)** / **(SD3.5 Large)** | Final pass: set every block individually via a comma-separated list (57 for FLUX, 60 for Qwen-Image, 38 for SD3.5). |
 | **LoRA Block Sweep Save Grid** | Renders the batched IMAGE output into a labeled grid PNG (block names on Y axis, weights on X axis). Model-agnostic. |
 
 Block tags:
 - **FLUX**: `D00..D18` (double-stream) + `S00..S37` (single-stream) = 57 blocks
 - **Qwen-Image**: `B00..B59` = 60 transformer blocks
+- **SD3.5 Large**: `J00..J37` = 38 joint blocks (MMDiT context + image halves)
 
 `baseline_weight` flips the experiment mode:
 
@@ -192,12 +256,15 @@ LoRA loaders built for SDXL's U-Net don't map cleanly:
   blocks (`single_blocks.{N}`). Tags `D00..D18` and `S00..S37`.
 - **Qwen-Image**: 60 single-stream MMDiT blocks (`transformer_blocks.{N}`) with
   joint image+text attention inside each block. Tags `B00..B59`.
+- **SD3.5 Large**: 38 MMDiT joint blocks (`joint_blocks.{N}`), each split into
+  a `context_block` (text) half and an `x_block` (image) half that share joint
+  attention. Tags `J00..J37`.
 
 This node groups LoRA keys by the model's actual block index via per-model
 regex on the state-dict keys, so the weights you set match the transformer
 the model actually runs. Adding a new DiT model means writing one small
-`BlockSpec` and four thin subclasses — see `lora_block_sweep/_qwen.py` for
-the template.
+`BlockSpec` and four thin subclasses — see `lora_block_sweep/_sd35.py` for
+the smallest template.
 
 ## Citation / inspiration
 

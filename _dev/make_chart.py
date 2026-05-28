@@ -4,6 +4,7 @@ Renders without matplotlib to avoid the dependency in _dev tooling.
 Usage:
   python make_chart.py                              # FLUX (default, backward compat)
   python make_chart.py --model qwen                 # Qwen-Image
+  python make_chart.py --model sd35                 # SD3.5 Large
   python make_chart.py --results-dir sweep_X --title "..." --out custom.png
 """
 import argparse
@@ -21,6 +22,11 @@ PRESETS = {
         results_dir="sweep_B_results",
         title="Per-block impact ranking — Qwen-Image transformer blocks, modern-anime LoRA",
         out_name="impact_chart_b.png",
+    ),
+    "sd35": dict(
+        results_dir="sweep_J_results",
+        title="Per-block impact ranking — SD3.5 Large joint-blocks, anime LoRA",
+        out_name="impact_chart_j.png",
     ),
 }
 
