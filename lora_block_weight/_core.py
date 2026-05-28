@@ -255,7 +255,7 @@ def parse_modes(spec_str: str):
 
 class _SweepBase:
     SPEC: BlockSpec = None  # subclass attaches
-    CATEGORY = "LoraBlockSweep"
+    CATEGORY = "LoraBlockWeight"
 
 
 class _SingleBlockSweepBase(_SweepBase):
@@ -628,7 +628,7 @@ def _tensor_to_pil(image_tensor: torch.Tensor) -> Image.Image:
     return Image.fromarray(arr)
 
 
-class LoraBlockSweepSaveGrid:
+class LoraBlockWeightSaveGrid:
     """Compose a sweep IMAGE batch into a single labeled grid PNG.
 
     Cells stay at original resolution. Labels live in dedicated header
@@ -637,7 +637,7 @@ class LoraBlockSweepSaveGrid:
     Batch sweep node's iteration order).
     """
 
-    CATEGORY = "LoraBlockSweep"
+    CATEGORY = "LoraBlockWeight"
 
     def __init__(self):
         self.output_dir = folder_paths.get_output_directory()

@@ -4,7 +4,7 @@
 Edit TOP_BLOCKS and BOT_BLOCKS after running fetch_and_analyze.py --model sd35
 on the Stage 1 sweep results — pick the N highest-MSE and N lowest-MSE blocks.
 
-Uses LoraBlockSweepSD35Custom with 4 explicit 38-value weight strings, all
+Uses LoraBlockWeightSD35Custom with 4 explicit 38-value weight strings, all
 sharing the same checkpoint / triple CLIP / latent / sampler so only the LoRA
 weighting differs between branches.
 """
@@ -68,7 +68,7 @@ nodes = {
 for i, (slug, w, label) in enumerate(variants):
     base = 10 + i * 10
     nodes[str(base + 0)] = {
-        "class_type": "LoraBlockSweepSD35Custom",
+        "class_type": "LoraBlockWeightSD35Custom",
         "inputs": {
             "model": ["1", 0],
             "clip": ["1b", 0],

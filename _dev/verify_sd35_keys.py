@@ -11,15 +11,15 @@ from collections import Counter
 
 # Make ComfyUI imports work
 sys.path.insert(0, "<ComfyUI>")
-sys.path.insert(0, "<ComfyUI>/custom_nodes/ComfyUI-LoraBlockSweep")
+sys.path.insert(0, "<ComfyUI>/custom_nodes/ComfyUI-LoraBlockWeight")
 
 import comfy.lora
 import comfy.lora_convert
 import comfy.utils
 import comfy.sd
 
-from lora_block_sweep._sd35 import SD35_SPEC
-from lora_block_sweep._core import classify_key
+from lora_block_weight._sd35 import SD35_SPEC
+from lora_block_weight._core import classify_key
 
 CKPT = "<ComfyUI>/models/checkpoints/Stable Diffusion 3.5 Large.safetensors"
 LORA = "<ComfyUI>/models/loras/sd35-large-anime.safetensors"

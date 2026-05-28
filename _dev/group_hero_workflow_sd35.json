@@ -42,7 +42,7 @@
     }
   },
   "10": {
-    "class_type": "LoraBlockSweepSD35Custom",
+    "class_type": "LoraBlockWeightSD35Custom",
     "inputs": {
       "model": [
         "1",
@@ -109,7 +109,7 @@
     }
   },
   "20": {
-    "class_type": "LoraBlockSweepSD35Custom",
+    "class_type": "LoraBlockWeightSD35Custom",
     "inputs": {
       "model": [
         "1",
@@ -176,7 +176,7 @@
     }
   },
   "30": {
-    "class_type": "LoraBlockSweepSD35Custom",
+    "class_type": "LoraBlockWeightSD35Custom",
     "inputs": {
       "model": [
         "1",
@@ -243,7 +243,7 @@
     }
   },
   "40": {
-    "class_type": "LoraBlockSweepSD35Custom",
+    "class_type": "LoraBlockWeightSD35Custom",
     "inputs": {
       "model": [
         "1",

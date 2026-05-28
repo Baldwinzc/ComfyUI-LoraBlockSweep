@@ -34,32 +34,32 @@ FLUX_SPEC = BlockSpec(
 )
 
 
-class LoraBlockSweepFlux(_SingleBlockSweepBase):
+class LoraBlockWeightFlux(_SingleBlockSweepBase):
     SPEC = FLUX_SPEC
 
 
-class LoraBlockSweepFluxCustom(_CustomSweepBase):
+class LoraBlockWeightFluxCustom(_CustomSweepBase):
     SPEC = FLUX_SPEC
 
 
-class LoraBlockSweepFluxBatch(_BatchSweepBase):
+class LoraBlockWeightFluxBatch(_BatchSweepBase):
     SPEC = FLUX_SPEC
 
 
-class LoraBlockSweepFluxGroup(_GroupSweepBase):
+class LoraBlockWeightFluxGroup(_GroupSweepBase):
     SPEC = FLUX_SPEC
 
 
 NODE_CLASS_MAPPINGS = {
-    "LoraBlockSweepFlux": LoraBlockSweepFlux,
-    "LoraBlockSweepFluxCustom": LoraBlockSweepFluxCustom,
-    "LoraBlockSweepFluxBatch": LoraBlockSweepFluxBatch,
-    "LoraBlockSweepFluxGroup": LoraBlockSweepFluxGroup,
+    "LoraBlockWeightFlux": LoraBlockWeightFlux,
+    "LoraBlockWeightFluxCustom": LoraBlockWeightFluxCustom,
+    "LoraBlockWeightFluxBatch": LoraBlockWeightFluxBatch,
+    "LoraBlockWeightFluxGroup": LoraBlockWeightFluxGroup,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "LoraBlockSweepFlux": "LoRA Block Sweep (FLUX)",
-    "LoraBlockSweepFluxCustom": "LoRA Block Sweep Custom (FLUX)",
-    "LoraBlockSweepFluxBatch": "LoRA Block Sweep Batch (FLUX)",
-    "LoraBlockSweepFluxGroup": "LoRA Block Sweep Group (FLUX)",
+    "LoraBlockWeightFlux": "LoRA Block Weight (FLUX)",
+    "LoraBlockWeightFluxCustom": "LoRA Block Weight Custom (FLUX)",
+    "LoraBlockWeightFluxBatch": "LoRA Block Weight Batch (FLUX)",
+    "LoraBlockWeightFluxGroup": "LoRA Block Weight Group (FLUX)",
 }

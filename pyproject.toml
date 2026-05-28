@@ -1,7 +1,7 @@
 [project]
-name = "comfyui-lorablocksweep"
+name = "comfyui-lorablockweight"
 description = "Per-block LoRA weighting for DiT models (FLUX, Qwen-Image, SD3.5 Large): scan every transformer block, sweep strengths, and render labeled comparison grids."
-version = "1.2.0"
+version = "2.0.0"
 license = { file = "LICENSE" }
 readme = "README.md"
 requires-python = ">=3.10"
@@ -18,10 +18,10 @@ classifiers = [
 dependencies = []
 
 [project.urls]
-Repository = "https://github.com/Baldwinzc/ComfyUI-LoraBlockSweep"
-"Bug Tracker" = "https://github.com/Baldwinzc/ComfyUI-LoraBlockSweep/issues"
+Repository = "https://github.com/Baldwinzc/ComfyUI-LoraBlockWeight"
+"Bug Tracker" = "https://github.com/Baldwinzc/ComfyUI-LoraBlockWeight/issues"
 
 [tool.comfy]
 PublisherId = "baldwinzc"
-DisplayName = "ComfyUI-LoraBlockSweep"
+DisplayName = "ComfyUI-LoraBlockWeight"
 Icon = ""

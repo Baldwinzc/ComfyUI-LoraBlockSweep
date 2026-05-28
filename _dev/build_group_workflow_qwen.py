@@ -4,7 +4,7 @@
 Edit TOP_BLOCKS and BOT_BLOCKS after running fetch_and_analyze.py --model qwen
 on the Stage 1 sweep results — pick the N highest-MSE and N lowest-MSE blocks.
 
-Uses LoraBlockSweepQwenCustom with 4 explicit 60-value weight strings, all
+Uses LoraBlockWeightQwenCustom with 4 explicit 60-value weight strings, all
 sharing the same UNet / CLIP / VAE / latent / sampler so only the LoRA
 weighting differs between branches.
 """
@@ -72,7 +72,7 @@ nodes = {
 for i, (slug, w, label) in enumerate(variants):
     base = 10 + i * 10
     nodes[str(base + 0)] = {
-        "class_type": "LoraBlockSweepQwenCustom",
+        "class_type": "LoraBlockWeightQwenCustom",
         "inputs": {
             "model": ["2", 0],
             "clip": ["3", 0],

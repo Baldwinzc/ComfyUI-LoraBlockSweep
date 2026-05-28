@@ -9,18 +9,18 @@
 
    ```bash
    cd <ComfyUI>/custom_nodes
-   git clone https://github.com/Baldwinzc/ComfyUI-LoraBlockSweep.git
+   git clone https://github.com/Baldwinzc/ComfyUI-LoraBlockWeight.git
    ```
 
 3. Restart ComfyUI
 
 ## Quickstart: knock-out sweep with Efficiency XY Plot
 
-Drop in `LoRA Block Sweep (FLUX)` where you'd normally use `LoraLoader`:
+Drop in `LoRA Block Weight (FLUX)` where you'd normally use `LoraLoader`:
 
 ```
 UNETLoader      ──┐
-                  ├──▶ LoRA Block Sweep (FLUX) ──▶ KSampler
+                  ├──▶ LoRA Block Weight (FLUX) ──▶ KSampler
 DualCLIPLoader ──┘
                        lora_name = <your_lora>.safetensors
                        baseline_weight = 1.0
@@ -59,7 +59,7 @@ what each block independently "knows".
 
 ## All-in-one: Batch node (no XY plot needed)
 
-If you don't want to install Efficiency Nodes, use **LoRA Block Sweep Batch
+If you don't want to install Efficiency Nodes, use **LoRA Block Weight Batch
 (FLUX)** instead. It internally loops over `(block, value)`, samples each, and
 returns a batched IMAGE.
 
@@ -75,13 +75,13 @@ EmptySD3LatentImage   ─→ latent_image
                          baseline_weight  = 1.0  (knock-out)  |  0.0 (solo)
                          seed/steps/cfg/sampler/scheduler/denoise = same as KSampler
 
-images out ─→ LoRA Block Sweep Save Grid   (labeled grid PNG)
+images out ─→ LoRA Block Weight Save Grid   (labeled grid PNG)
            └→ SaveImage                    (also keeps individual cells)
 ```
 
 `CLIP` input is intentionally absent — positive/negative are already encoded
 upstream, so CLIP-side LoRA patches would have no effect. If you need
-CLIP-side LoRA, use the regular Block Sweep node + Efficiency XY Plot.
+CLIP-side LoRA, use the regular Block Weight node + Efficiency XY Plot.
 
 ### First-round recipe (recommended)
 
@@ -96,7 +96,7 @@ in a second run if needed. (The README demo follows exactly this recipe.)
 
 ## Group sweeps (after narrowing down)
 
-Use **LoRA Block Sweep Group (FLUX)** to sweep contiguous block ranges as a
+Use **LoRA Block Weight Group (FLUX)** to sweep contiguous block ranges as a
 single unit. Groups can be ranges (`D00-D06`), individual blocks (`S15`),
 or mixed comma-lists (`D00-D03,S20`). Ranges may not cross D and S.
 
@@ -107,7 +107,7 @@ single-block sweep reveals where the action concentrates.**
 
 ## Fine-tune all 57 blocks
 
-Use **LoRA Block Sweep Custom (FLUX)**. Paste a 57-value comma list in the
+Use **LoRA Block Weight Custom (FLUX)**. Paste a 57-value comma list in the
 order:
 
     D00,D01,...,D18,S00,S01,...,S37
@@ -139,7 +139,7 @@ EmptySD3LatentImage   ─→ latent_image
                          seed/steps/cfg = workflow-appropriate
                          (Qwen-Image Lightning: 8 steps, cfg=1.0)
 
-images out ─→ LoRA Block Sweep Save Grid   (labeled grid PNG)
+images out ─→ LoRA Block Weight Save Grid   (labeled grid PNG)
            └→ SaveImage                    (also keeps individual cells)
 ```
 
@@ -178,7 +178,7 @@ EmptySD3LatentImage    ─→ latent_image  (1024×1024 recommended)
                           baseline_weight = 1.0 (knock-out) | 0.0 (solo)
                           cfg = 4.5, sampler = euler, scheduler = sgm_uniform, steps = 20
 
-images out ─→ LoRA Block Sweep Save Grid   (labeled grid PNG)
+images out ─→ LoRA Block Weight Save Grid   (labeled grid PNG)
            └→ SaveImage                    (also keeps individual cells)
 ```
 

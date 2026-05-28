@@ -9,18 +9,18 @@
 
    ```bash
    cd <ComfyUI>/custom_nodes
-   git clone https://github.com/Baldwinzc/ComfyUI-LoraBlockSweep.git
+   git clone https://github.com/Baldwinzc/ComfyUI-LoraBlockWeight.git
    ```
 
 3. 重启 ComfyUI
 
 ## 快速开始：用 Efficiency XY Plot 跑 knock-out 扫描
 
-把 `LoRA Block Sweep (FLUX)` 接到原本 `LoraLoader` 的位置：
+把 `LoRA Block Weight (FLUX)` 接到原本 `LoraLoader` 的位置：
 
 ```
 UNETLoader      ──┐
-                  ├──▶ LoRA Block Sweep (FLUX) ──▶ KSampler
+                  ├──▶ LoRA Block Weight (FLUX) ──▶ KSampler
 DualCLIPLoader ──┘
                        lora_name = <your_lora>.safetensors
                        baseline_weight = 1.0
@@ -57,7 +57,7 @@ DualCLIPLoader ──┘
 
 ## 一体式：Batch 节点（不需要 XY plot）
 
-如果你不想装 Efficiency Nodes，用 **LoRA Block Sweep Batch (FLUX)** 即可。
+如果你不想装 Efficiency Nodes，用 **LoRA Block Weight Batch (FLUX)** 即可。
 它内部循环 `(block, value)`、逐个采样，返回 batched IMAGE。
 
 ```
@@ -72,12 +72,12 @@ EmptySD3LatentImage   ─→ latent_image
                          baseline_weight  = 1.0  （knock-out）  |  0.0 （solo）
                          seed/steps/cfg/sampler/scheduler/denoise = 与 KSampler 一致
 
-images out ─→ LoRA Block Sweep Save Grid   （标注网格 PNG）
+images out ─→ LoRA Block Weight Save Grid   （标注网格 PNG）
            └→ SaveImage                    （也保留单独的格子）
 ```
 
 故意没有 `CLIP` 输入 —— positive/negative 已经在上游编码完了，CLIP 侧的
-LoRA patch 不会生效。如果你需要 CLIP 侧 LoRA，用常规 Block Sweep 节点
+LoRA patch 不会生效。如果你需要 CLIP 侧 LoRA，用常规 Block Weight 节点
 + Efficiency XY Plot。
 
 ### 第一轮推荐配方
@@ -93,7 +93,7 @@ D00,D01,D02,D03,D04,D05,D06,D07,D08,D09,D10,D11,D12,D13,D14,D15,D16,D17,D18
 
 ## 块组扫描（在大致定位之后）
 
-用 **LoRA Block Sweep Group (FLUX)** 把连续的块范围作为一个整体扫描。
+用 **LoRA Block Weight Group (FLUX)** 把连续的块范围作为一个整体扫描。
 组可以是范围（`D00-D06`）、单块（`S15`）或混合逗号列表
 （`D00-D03,S20`）。范围不能跨 D 和 S。
 
@@ -103,7 +103,7 @@ D00,D01,D02,D03,D04,D05,D06,D07,D08,D09,D10,D11,D12,D13,D14,D15,D16,D17,D18
 
 ## 精细微调全部 57 块
 
-用 **LoRA Block Sweep Custom (FLUX)**。按以下顺序粘贴 57 个值的逗号列表：
+用 **LoRA Block Weight Custom (FLUX)**。按以下顺序粘贴 57 个值的逗号列表：
 
     D00,D01,...,D18,S00,S01,...,S37
 
@@ -133,7 +133,7 @@ EmptySD3LatentImage   ─→ latent_image
                          seed/steps/cfg = 跟你工作流一致
                          (Qwen-Image Lightning: 8 steps, cfg=1.0)
 
-images out ─→ LoRA Block Sweep Save Grid   （标注网格 PNG）
+images out ─→ LoRA Block Weight Save Grid   （标注网格 PNG）
            └→ SaveImage                    （也保留单独的格子）
 ```
 
@@ -171,7 +171,7 @@ EmptySD3LatentImage    ─→ latent_image（推荐 1024×1024）
                           baseline_weight = 1.0 (knock-out) | 0.0 (solo)
                           cfg = 4.5, sampler = euler, scheduler = sgm_uniform, steps = 20
 
-images out ─→ LoRA Block Sweep Save Grid   （标注网格 PNG）
+images out ─→ LoRA Block Weight Save Grid   （标注网格 PNG）
            └→ SaveImage                    （也保留单独的格子）
 ```
 

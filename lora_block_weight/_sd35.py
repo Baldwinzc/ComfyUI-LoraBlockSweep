@@ -41,32 +41,32 @@ SD35_SPEC = BlockSpec(
 )
 
 
-class LoraBlockSweepSD35(_SingleBlockSweepBase):
+class LoraBlockWeightSD35(_SingleBlockSweepBase):
     SPEC = SD35_SPEC
 
 
-class LoraBlockSweepSD35Custom(_CustomSweepBase):
+class LoraBlockWeightSD35Custom(_CustomSweepBase):
     SPEC = SD35_SPEC
 
 
-class LoraBlockSweepSD35Batch(_BatchSweepBase):
+class LoraBlockWeightSD35Batch(_BatchSweepBase):
     SPEC = SD35_SPEC
 
 
-class LoraBlockSweepSD35Group(_GroupSweepBase):
+class LoraBlockWeightSD35Group(_GroupSweepBase):
     SPEC = SD35_SPEC
 
 
 NODE_CLASS_MAPPINGS = {
-    "LoraBlockSweepSD35": LoraBlockSweepSD35,
-    "LoraBlockSweepSD35Custom": LoraBlockSweepSD35Custom,
-    "LoraBlockSweepSD35Batch": LoraBlockSweepSD35Batch,
-    "LoraBlockSweepSD35Group": LoraBlockSweepSD35Group,
+    "LoraBlockWeightSD35": LoraBlockWeightSD35,
+    "LoraBlockWeightSD35Custom": LoraBlockWeightSD35Custom,
+    "LoraBlockWeightSD35Batch": LoraBlockWeightSD35Batch,
+    "LoraBlockWeightSD35Group": LoraBlockWeightSD35Group,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "LoraBlockSweepSD35": "LoRA Block Sweep (SD3.5 Large)",
-    "LoraBlockSweepSD35Custom": "LoRA Block Sweep Custom (SD3.5 Large)",
-    "LoraBlockSweepSD35Batch": "LoRA Block Sweep Batch (SD3.5 Large)",
-    "LoraBlockSweepSD35Group": "LoRA Block Sweep Group (SD3.5 Large)",
+    "LoraBlockWeightSD35": "LoRA Block Weight (SD3.5 Large)",
+    "LoraBlockWeightSD35Custom": "LoRA Block Weight Custom (SD3.5 Large)",
+    "LoraBlockWeightSD35Batch": "LoRA Block Weight Batch (SD3.5 Large)",
+    "LoraBlockWeightSD35Group": "LoRA Block Weight Group (SD3.5 Large)",
 }

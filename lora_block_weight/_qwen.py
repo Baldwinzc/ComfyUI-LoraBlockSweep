@@ -38,32 +38,32 @@ QWEN_SPEC = BlockSpec(
 )
 
 
-class LoraBlockSweepQwen(_SingleBlockSweepBase):
+class LoraBlockWeightQwen(_SingleBlockSweepBase):
     SPEC = QWEN_SPEC
 
 
-class LoraBlockSweepQwenCustom(_CustomSweepBase):
+class LoraBlockWeightQwenCustom(_CustomSweepBase):
     SPEC = QWEN_SPEC
 
 
-class LoraBlockSweepQwenBatch(_BatchSweepBase):
+class LoraBlockWeightQwenBatch(_BatchSweepBase):
     SPEC = QWEN_SPEC
 
 
-class LoraBlockSweepQwenGroup(_GroupSweepBase):
+class LoraBlockWeightQwenGroup(_GroupSweepBase):
     SPEC = QWEN_SPEC
 
 
 NODE_CLASS_MAPPINGS = {
-    "LoraBlockSweepQwen": LoraBlockSweepQwen,
-    "LoraBlockSweepQwenCustom": LoraBlockSweepQwenCustom,
-    "LoraBlockSweepQwenBatch": LoraBlockSweepQwenBatch,
-    "LoraBlockSweepQwenGroup": LoraBlockSweepQwenGroup,
+    "LoraBlockWeightQwen": LoraBlockWeightQwen,
+    "LoraBlockWeightQwenCustom": LoraBlockWeightQwenCustom,
+    "LoraBlockWeightQwenBatch": LoraBlockWeightQwenBatch,
+    "LoraBlockWeightQwenGroup": LoraBlockWeightQwenGroup,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "LoraBlockSweepQwen": "LoRA Block Sweep (Qwen-Image)",
-    "LoraBlockSweepQwenCustom": "LoRA Block Sweep Custom (Qwen-Image)",
-    "LoraBlockSweepQwenBatch": "LoRA Block Sweep Batch (Qwen-Image)",
-    "LoraBlockSweepQwenGroup": "LoRA Block Sweep Group (Qwen-Image)",
+    "LoraBlockWeightQwen": "LoRA Block Weight (Qwen-Image)",
+    "LoraBlockWeightQwenCustom": "LoRA Block Weight Custom (Qwen-Image)",
+    "LoraBlockWeightQwenBatch": "LoRA Block Weight Batch (Qwen-Image)",
+    "LoraBlockWeightQwenGroup": "LoRA Block Weight Group (Qwen-Image)",
 }

@@ -36,7 +36,7 @@
     }
   },
   "5": {
-    "class_type": "LoraBlockSweepSD35Batch",
+    "class_type": "LoraBlockWeightSD35Batch",
     "inputs": {
       "model": ["1", 0],
       "vae": ["1", 2],
@@ -56,7 +56,7 @@
     }
   },
   "6": {
-    "class_type": "LoraBlockSweepSaveGrid",
+    "class_type": "LoraBlockWeightSaveGrid",
     "inputs": {
       "images": ["5", 0],
       "blocks": "J00",

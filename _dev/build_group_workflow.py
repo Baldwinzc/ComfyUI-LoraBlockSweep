@@ -4,7 +4,7 @@
 Top-7 by MSE (most impactful): D00, D02, D03, D07, D08, D09, D15
 Bot-7 by MSE (least impactful): D01, D10, D12, D13, D14, D17, D18
 
-Uses LoraBlockSweepFluxCustom with 4 explicit 57-value weight strings, all
+Uses LoraBlockWeightFluxCustom with 4 explicit 57-value weight strings, all
 sharing the same UNet / CLIP / VAE / latent / sampler so only the LoRA
 weighting differs between branches.
 """
@@ -68,7 +68,7 @@ SAMPLE_PARAMS = dict(seed=42, steps=20, cfg=1.0, sampler_name="euler",
 for i, (slug, w, label) in enumerate(variants):
     base = 10 + i * 10
     nodes[str(base + 0)] = {
-        "class_type": "LoraBlockSweepFluxCustom",
+        "class_type": "LoraBlockWeightFluxCustom",
         "inputs": {
             "model": ["1", 0],
             "clip": ["2", 0],

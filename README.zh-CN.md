@@ -1,4 +1,4 @@
-# ComfyUI-LoraBlockSweep
+# ComfyUI-LoraBlockWeight
 
 [English](README.md) | **简体中文**
 
@@ -200,13 +200,13 @@ Full LoRA、No LoRA 对比。相同 prompt、相同 seed。
 ## 安装
 
 **通过 [ComfyUI-Manager](https://github.com/ltdrdata/ComfyUI-Manager)(待收录后)**:
-搜索 "LoraBlockSweep" → Install。
+搜索 "LoraBlockWeight" → Install。
 
 **手动安装:**
 
 ```bash
 cd <ComfyUI>/custom_nodes
-git clone https://github.com/Baldwinzc/ComfyUI-LoraBlockSweep.git
+git clone https://github.com/Baldwinzc/ComfyUI-LoraBlockWeight.git
 ```
 
 重启 ComfyUI。
@@ -217,11 +217,11 @@ git clone https://github.com/Baldwinzc/ComfyUI-LoraBlockSweep.git
 
 | 节点 | 适用场景 |
 |------|----------|
-| **LoRA Block Sweep (FLUX)** / **(Qwen-Image)** / **(SD3.5 Large)** | 可直接替换 `LoraLoader`,一次一个块 × 一个值。配 Efficiency XY Plot 跑网格扫描。 |
-| **LoRA Block Sweep Batch (FLUX)** / **(Qwen-Image)** / **(SD3.5 Large)** | 一体式:内部循环 `(block, value)`、逐个采样、返回 batched IMAGE。不需要 XY plot。上面 demo 用的就是这一类节点。 |
-| **LoRA Block Sweep Group (FLUX)** / **(Qwen-Image)** / **(SD3.5 Large)** | 对**块组**扫描(比如 `D00-D06`、`B10-B19`、`J00-J09`),适合大致定位之后做细化。 |
-| **LoRA Block Sweep Custom (FLUX)** / **(Qwen-Image)** / **(SD3.5 Large)** | 终极调试:通过逗号分隔列表单独设置每一个块(FLUX 57 个,Qwen-Image 60 个,SD3.5 38 个)。 |
-| **LoRA Block Sweep Save Grid** | 把 batched IMAGE 输出渲染成标注网格 PNG(Y 轴块名、X 轴权重)。模型无关。 |
+| **LoRA Block Weight (FLUX)** / **(Qwen-Image)** / **(SD3.5 Large)** | 可直接替换 `LoraLoader`,一次一个块 × 一个值。配 Efficiency XY Plot 跑网格扫描。 |
+| **LoRA Block Weight Batch (FLUX)** / **(Qwen-Image)** / **(SD3.5 Large)** | 一体式:内部循环 `(block, value)`、逐个采样、返回 batched IMAGE。不需要 XY plot。上面 demo 用的就是这一类节点。 |
+| **LoRA Block Weight Group (FLUX)** / **(Qwen-Image)** / **(SD3.5 Large)** | 对**块组**扫描(比如 `D00-D06`、`B10-B19`、`J00-J09`),适合大致定位之后做细化。 |
+| **LoRA Block Weight Custom (FLUX)** / **(Qwen-Image)** / **(SD3.5 Large)** | 终极调试:通过逗号分隔列表单独设置每一个块(FLUX 57 个,Qwen-Image 60 个,SD3.5 38 个)。 |
+| **LoRA Block Weight Save Grid** | 把 batched IMAGE 输出渲染成标注网格 PNG(Y 轴块名、X 轴权重)。模型无关。 |
 
 块标签:
 - **FLUX**:`D00..D18`(double-stream)+ `S00..S37`(single-stream)= 57 块
@@ -255,7 +255,7 @@ LoRA 加载器映射不过来:
 本节点按各自模型的真实块索引,通过正则匹配 state_dict key 来分组 LoRA
 权重,确保你设的强度对应模型实际跑的 transformer。新增一个 DiT 模型
 只需写一个 `BlockSpec` 加 4 个薄子类 —— 最简单的模板见
-`lora_block_sweep/_sd35.py`。
+`lora_block_weight/_sd35.py`。
 
 ## 致谢 / 灵感来源
 
@@ -270,6 +270,6 @@ MIT —— 见 [LICENSE](LICENSE)。
 
 ## 贡献
 
-欢迎通过 [Issues](https://github.com/Baldwinzc/ComfyUI-LoraBlockSweep/issues)
+欢迎通过 [Issues](https://github.com/Baldwinzc/ComfyUI-LoraBlockWeight/issues)
 提 bug 报告和 LoRA 相关发现 —— 如果你扫了某个流行 LoRA 并找到有意思
 的块排序,欢迎分享。

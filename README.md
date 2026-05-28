@@ -1,4 +1,4 @@
-# ComfyUI-LoraBlockSweep
+# ComfyUI-LoraBlockWeight
 
 **English** | [简体中文](README.zh-CN.md)
 
@@ -208,13 +208,13 @@ Reproduce (SD3.5 variant):
 
 ## Install
 
-**Via [ComfyUI-Manager](https://github.com/ltdrdata/ComfyUI-Manager)** (when listed): search "LoraBlockSweep" → Install.
+**Via [ComfyUI-Manager](https://github.com/ltdrdata/ComfyUI-Manager)** (when listed): search "LoraBlockWeight" → Install.
 
 **Manual:**
 
 ```bash
 cd <ComfyUI>/custom_nodes
-git clone https://github.com/Baldwinzc/ComfyUI-LoraBlockSweep.git
+git clone https://github.com/Baldwinzc/ComfyUI-LoraBlockWeight.git
 ```
 
 Restart ComfyUI.
@@ -225,11 +225,11 @@ Dependencies (`numpy`, `Pillow`, `torch`) are already pulled in by ComfyUI.
 
 | Node | Use when |
 |------|----------|
-| **LoRA Block Sweep (FLUX)** / **(Qwen-Image)** / **(SD3.5 Large)** | Drop-in `LoraLoader` replacement, one block × one value. Wire to Efficiency XY Plot for grid sweeps. |
-| **LoRA Block Sweep Batch (FLUX)** / **(Qwen-Image)** / **(SD3.5 Large)** | All-in-one: loops over `(block, value)` internally, samples each, returns a batched IMAGE. No XY plot needed. Used in the demos above. |
-| **LoRA Block Sweep Group (FLUX)** / **(Qwen-Image)** / **(SD3.5 Large)** | Sweep *grouped* blocks (e.g. `D00-D06`, `B10-B19`, `J00-J09`) once you've narrowed down where the action is. |
-| **LoRA Block Sweep Custom (FLUX)** / **(Qwen-Image)** / **(SD3.5 Large)** | Final pass: set every block individually via a comma-separated list (57 for FLUX, 60 for Qwen-Image, 38 for SD3.5). |
-| **LoRA Block Sweep Save Grid** | Renders the batched IMAGE output into a labeled grid PNG (block names on Y axis, weights on X axis). Model-agnostic. |
+| **LoRA Block Weight (FLUX)** / **(Qwen-Image)** / **(SD3.5 Large)** | Drop-in `LoraLoader` replacement, one block × one value. Wire to Efficiency XY Plot for grid sweeps. |
+| **LoRA Block Weight Batch (FLUX)** / **(Qwen-Image)** / **(SD3.5 Large)** | All-in-one: loops over `(block, value)` internally, samples each, returns a batched IMAGE. No XY plot needed. Used in the demos above. |
+| **LoRA Block Weight Group (FLUX)** / **(Qwen-Image)** / **(SD3.5 Large)** | Sweep *grouped* blocks (e.g. `D00-D06`, `B10-B19`, `J00-J09`) once you've narrowed down where the action is. |
+| **LoRA Block Weight Custom (FLUX)** / **(Qwen-Image)** / **(SD3.5 Large)** | Final pass: set every block individually via a comma-separated list (57 for FLUX, 60 for Qwen-Image, 38 for SD3.5). |
+| **LoRA Block Weight Save Grid** | Renders the batched IMAGE output into a labeled grid PNG (block names on Y axis, weights on X axis). Model-agnostic. |
 
 Block tags:
 - **FLUX**: `D00..D18` (double-stream) + `S00..S37` (single-stream) = 57 blocks
@@ -263,7 +263,7 @@ LoRA loaders built for SDXL's U-Net don't map cleanly:
 This node groups LoRA keys by the model's actual block index via per-model
 regex on the state-dict keys, so the weights you set match the transformer
 the model actually runs. Adding a new DiT model means writing one small
-`BlockSpec` and four thin subclasses — see `lora_block_sweep/_sd35.py` for
+`BlockSpec` and four thin subclasses — see `lora_block_weight/_sd35.py` for
 the smallest template.
 
 ## Citation / inspiration
@@ -280,5 +280,5 @@ MIT — see [LICENSE](LICENSE).
 ## Contributing
 
 Bug reports and LoRA-specific findings welcome via
-[Issues](https://github.com/Baldwinzc/ComfyUI-LoraBlockSweep/issues) — if you
+[Issues](https://github.com/Baldwinzc/ComfyUI-LoraBlockWeight/issues) — if you
 sweep a popular LoRA and find an interesting block ranking, share it.
