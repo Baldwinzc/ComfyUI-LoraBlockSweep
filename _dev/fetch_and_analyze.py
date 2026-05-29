@@ -3,7 +3,7 @@ labeled grid PNG, then ranks blocks by impact (MSE between value=0 and
 value=1.0 for the same block — high MSE = critical block, low MSE = expendable).
 
 Usage:
-  # FLUX double-block sweep (default — backward compatible)
+  # FLUX.1 double-block sweep (default — backward compatible)
   python fetch_and_analyze.py <prompt_id>
 
   # Qwen-Image full sweep

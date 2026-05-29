@@ -16,11 +16,11 @@
 
 ## Quickstart: knock-out sweep with Efficiency XY Plot
 
-Drop in `LoRA Block Weight (FLUX)` where you'd normally use `LoraLoader`:
+Drop in `LoRA Block Weight (FLUX.1)` where you'd normally use `LoraLoader`:
 
 ```
 UNETLoader      ──┐
-                  ├──▶ LoRA Block Weight (FLUX) ──▶ KSampler
+                  ├──▶ LoRA Block Weight (FLUX.1) ──▶ KSampler
 DualCLIPLoader ──┘
                        lora_name = <your_lora>.safetensors
                        baseline_weight = 1.0
@@ -60,7 +60,7 @@ what each block independently "knows".
 ## All-in-one: Batch node (no XY plot needed)
 
 If you don't want to install Efficiency Nodes, use **LoRA Block Weight Batch
-(FLUX)** instead. It internally loops over `(block, value)`, samples each, and
+(FLUX.1)** instead. It internally loops over `(block, value)`, samples each, and
 returns a batched IMAGE.
 
 ```
@@ -96,7 +96,7 @@ in a second run if needed. (The README demo follows exactly this recipe.)
 
 ## Group sweeps (after narrowing down)
 
-Use **LoRA Block Weight Group (FLUX)** to sweep contiguous block ranges as a
+Use **LoRA Block Weight Group (FLUX.1)** to sweep contiguous block ranges as a
 single unit. Groups can be ranges (`D00-D06`), individual blocks (`S15`),
 or mixed comma-lists (`D00-D03,S20`). Ranges may not cross D and S.
 
@@ -107,7 +107,7 @@ single-block sweep reveals where the action concentrates.**
 
 ## Fine-tune all 57 blocks
 
-Use **LoRA Block Weight Custom (FLUX)**. Paste a 57-value comma list in the
+Use **LoRA Block Weight Custom (FLUX.1)**. Paste a 57-value comma list in the
 order:
 
     D00,D01,...,D18,S00,S01,...,S37
@@ -121,7 +121,7 @@ Example — keep all double blocks at full, taper late single blocks:
 ## Qwen-Image
 
 Qwen-Image has 60 single-stream transformer blocks (tags `B00..B59`).
-Every Qwen node mirrors the FLUX node above — just swap `(FLUX)` for
+Every Qwen node mirrors the FLUX.1 node above — just swap `(FLUX.1)` for
 `(Qwen-Image)` in the node name and use `B00..B59` instead of
 `D00-D18,S00-S37`.
 
@@ -164,7 +164,7 @@ zoom in with the Group node on contiguous ranges (e.g. `B20-B29`).
 ## SD3.5 Large
 
 SD3.5 Large has 38 MMDiT joint blocks (tags `J00..J37`). Every SD3.5 node
-mirrors the FLUX/Qwen node above — swap to `(SD3.5 Large)` and use
+mirrors the FLUX.1/Qwen node above — swap to `(SD3.5 Large)` and use
 `J00..J37`.
 
 ```

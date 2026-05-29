@@ -2,7 +2,7 @@
 Renders without matplotlib to avoid the dependency in _dev tooling.
 
 Usage:
-  python make_chart.py                              # FLUX (default, backward compat)
+  python make_chart.py                              # FLUX.1 (default, backward compat)
   python make_chart.py --model qwen                 # Qwen-Image
   python make_chart.py --model sd35                 # SD3.5 Large
   python make_chart.py --results-dir sweep_X --title "..." --out custom.png

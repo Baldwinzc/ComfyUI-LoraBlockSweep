@@ -4,7 +4,7 @@ Fetches the four images produced by group_hero_workflow*.json, lays them out
 side-by-side with labels, and writes hero_group.png.
 
 Usage:
-  python make_hero.py <prompt_id>                  # FLUX (default, backward compat)
+  python make_hero.py <prompt_id>                  # FLUX.1 (default, backward compat)
   python make_hero.py <prompt_id> --model qwen     # Qwen-Image
   python make_hero.py <prompt_id> --model sd35     # SD3.5 Large
 SERVER env var overrides default ComfyUI URL.

@@ -4,7 +4,7 @@ Defines a `BlockSpec` describing one model family's transformer block layout
 (name, count, key regex), plus base node classes that each model module
 subclasses by attaching its own `SPEC`.
 
-FLUX, Qwen-Image, and SD3.5 differ in their block layout but share the same
+FLUX.1, Qwen-Image, and SD3.5 differ in their block layout but share the same
 mechanics: parse a LoRA file, group its keys by transformer block, apply each
 group with its own scalar strength via `model_patcher.add_patches`.
 """
@@ -35,12 +35,12 @@ class BlockSpec:
     is classified as `f"{prefix}{idx:02d}"` provided idx < count.
 
     Block names are produced by `_build_block_names` in the order given by
-    `tag_groups` insertion order. FLUX yields D00..D18,S00..S37; Qwen
+    `tag_groups` insertion order. FLUX.1 yields D00..D18,S00..S37; Qwen
     yields B00..B59; SD3.5 yields J00..J37.
     """
 
     model_key: str                          # "flux" | "qwen" | "sd35" — used in node id / category
-    display_name: str                       # "FLUX" | "Qwen-Image" | "SD3.5" — user-facing
+    display_name: str                       # "FLUX.1" | "Qwen-Image" | "SD3.5" — user-facing
     tag_groups: dict                        # {"D": (19, r"diffusion_model\.double_blocks\.(\d+)\."), ...}
     default_groups: str                     # multiline string for Group node default
     default_first_round_blocks: str = ""    # comma list of blocks for SaveGrid default (empty -> all)

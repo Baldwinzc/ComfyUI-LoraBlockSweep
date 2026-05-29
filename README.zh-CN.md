@@ -5,11 +5,15 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
 [![ComfyUI](https://img.shields.io/badge/ComfyUI-custom%20node-success)](https://github.com/comfyanonymous/ComfyUI)
-[![Model: FLUX](https://img.shields.io/badge/model-FLUX-orange)](https://blackforestlabs.ai/)
+[![Model: FLUX.1](https://img.shields.io/badge/model-FLUX.1-orange)](https://blackforestlabs.ai/)
 [![Model: Qwen-Image](https://img.shields.io/badge/model-Qwen--Image-purple)](https://github.com/QwenLM/Qwen-Image)
 [![Model: SD3.5](https://img.shields.io/badge/model-SD3.5%20Large-blue)](https://stability.ai/news/introducing-stable-diffusion-3-5)
 
-为 DiT 系列模型提供按块（per-block）的 LoRA 权重控制 —— **FLUX**（19 个
+**LoRA 太霸道？盖过 prompt、把风格糊到不该糊的地方、和别的 LoRA 打架？**
+按块权重让你保留有效果的那几块、把作乱的那几块归零 —— 但你得先知道
+*哪些块*是哪些。本节点就是干这个的。
+
+为 DiT 系列模型提供按块（per-block）的 LoRA 权重控制 —— **FLUX.1**（19 个
 double + 38 个 single = 57 块）、**Qwen-Image**（60 个 transformer 块）和
 **SD3.5 Large**（38 个 joint block）。独立设置每块强度，从标注网格里直接
 读出每块的影响。
@@ -27,14 +31,14 @@ double + 38 个 single = 57 块）、**Qwen-Image**（60 个 transformer 块）�
 
 大多数 LoRA 加载器只接受一个 `strength` 标量，对整个 adapter 生效。
 SD1.5/SDXL 的按块加载器（LBW、Bobs Lora Loader）暴露的是 14 个左右的
-概念块组。**本节点暴露的是 DiT 真实的 transformer block**（FLUX 57 个、
+概念块组。**本节点暴露的是 DiT 真实的 transformer block**（FLUX.1 57 个、
 Qwen-Image 60 个、SD3.5 Large 38 个），按块扫一遍就能拿到清晰的逐层
 信号 —— 哪些块重要、哪些是死重、哪些可以调低而不丢风格。
 
 可以配合 [Efficiency Nodes 的 XY Plot](https://github.com/jags111/efficiency-nodes-comfyui)
 使用，或通过自带的 batch 节点独立运行,不需要外部编排工具。
 
-## Demo 1 —— FLUX + `alvdansen/frosting_lane_flux`
+## Demo 1 —— FLUX.1 + `alvdansen/frosting_lane_flux`
 
 最上面那张 hero 图来自一个两阶段实验。
 
@@ -48,7 +52,7 @@ MSE。MSE 越大,说明这个块对 LoRA 效果的贡献越大。
 就是上面那张四联图。Stage 1 的 MSE 排序很干净地预测了 Stage 2 的视觉
 效果:关掉顶部 7 个,风格丢失;关掉底部 7 个,毫无损失。
 
-![FLUX 按块影响力柱状图](docs/impact_chart_d.png)
+![FLUX.1 按块影响力柱状图](docs/impact_chart_d.png)
 
 |              | 块    | MSE       |
 |--------------|-------|-----------|
@@ -84,14 +88,14 @@ D00 → D01 之间 14× 的差距,正是 hero 的 Bot-7 off 看起来和 Full
 
 ## Demo 2 —— Qwen-Image + `alfredplpl/qwen-image-modern-anime-lora`
 
-同样的实验流程换到 Qwen-Image + 另一个 LoRA,证明这个方法不是 FLUX 专属。
+同样的实验流程换到 Qwen-Image + 另一个 LoRA,证明这个方法不是 FLUX.1 专属。
 
 ![Qwen-Image 分组关掉对比:Full / Top-12 off / Bot-12 off / No LoRA](docs/hero_group_qwen.png)
 
 > Qwen-Image 有 60 个 transformer 块。关掉 **MSE 最高的 12 个块**,
 > 这个 modern-anime LoRA 的插画风格被剥离,结果往写实方向回落。关掉
 > **MSE 最低的 12 个块**,视觉上和 Full LoRA 没区别。块数更多,LoRA
-> 信号也分得更散:**Top/Bot MSE 比 = 24×**,而 FLUX 是 14×。
+> 信号也分得更散:**Top/Bot MSE 比 = 24×**,而 FLUX.1 是 14×。
 
 **Stage 1。** 把全部 60 个 transformer 块在权重
 `{0, 0.25, 0.5, 0.75, 1.0}` 下扫一遍,其他块全部保持 `1.0`。
@@ -148,7 +152,7 @@ D00 → D01 之间 14× 的差距,正是 hero 的 Bot-7 off 看起来和 Full
 > 同样的实验。关掉 **MSE 最低的 12 个块**（Bot-12 off），视觉上和 Full
 > LoRA 没区别 —— 12 个死重块确认。关掉 **MSE 最高的 12 个块**（Top-12
 > off），结果明显变了 —— 构图坍缩（户外云景退化为纯背景）、风格变柔，
-> 但**没有**完全回退到 No-LoRA 的样子。SD3.5 的 joint block 比 FLUX 的
+> 但**没有**完全回退到 No-LoRA 的样子。SD3.5 的 joint block 比 FLUX.1 的
 > double-stream 更冗余地承载 LoRA 信号：只关掉头部一组还不足以剥离风格。
 > **Top/Bot MSE 比 = 47×**，是三个 demo 里差距最大的。
 
@@ -197,6 +201,29 @@ Full LoRA、No LoRA 对比。相同 prompt、相同 seed。
 - [`_dev/build_group_workflow_sd35.py`](_dev/build_group_workflow_sd35.py) —— 生成 Stage 2 workflow
 - `python _dev/make_hero.py <prompt_id> --model sd35` —— 合成四联 hero 图
 
+## 推荐工作流
+
+三轮下来，一个 LoRA 就从"一个全局 strength 标量"变成"按块调过的配方"：
+
+1. **全扫 + 排序。** 用 Batch 节点（或 XY plot）做一次完整扫描，
+   `baseline_weight = 1.0`。把结果喂给 `_dev/fetch_and_analyze.py`
+   按 MSE 排每一块。这一步你就拿到了上面 demo 里那种
+   **关键 / 中等 / 可忽略** 的三档划分。
+
+2. **去掉死重。** 打开 Custom 节点，把每个"可忽略"块设成 `0`。
+   这些块本来就几乎不贡献什么 —— 归零它们能减少和其他 LoRA 叠加时的
+   干扰、给 prompt 让出表达空间、轻微降低推理成本。风险最低、ROI 最高
+   的一刀。
+
+3. **调中间。** "关键"块保持 `1.0`（或你常用的全局 strength）。
+   "中等"块就是可调旋钮 —— 在 Custom 节点里把它们设成 `0.5` 跑一遍和
+   Full 对比。如果 LoRA 还在往不该出现的地方糊风格，继续把中等块往下
+   压。如果你想要更强的 LoRA 味道，把中等块推过 `1.0`。
+
+只想快速看一眼，可以跳过第 1 步的完整扫描，直接用 [USAGE.md](USAGE.md)
+里每个模型的"第一轮推荐配方" —— 稀疏取 10–12 个块就能定位活跃段，
+50–95 张图就够，不用跑满 190–300。
+
 ## 安装
 
 **通过 [ComfyUI-Manager](https://github.com/ltdrdata/ComfyUI-Manager)(待收录后)**:
@@ -217,14 +244,14 @@ git clone https://github.com/Baldwinzc/ComfyUI-LoraBlockWeight.git
 
 | 节点 | 适用场景 |
 |------|----------|
-| **LoRA Block Weight (FLUX)** / **(Qwen-Image)** / **(SD3.5 Large)** | 可直接替换 `LoraLoader`,一次一个块 × 一个值。配 Efficiency XY Plot 跑网格扫描。 |
-| **LoRA Block Weight Batch (FLUX)** / **(Qwen-Image)** / **(SD3.5 Large)** | 一体式:内部循环 `(block, value)`、逐个采样、返回 batched IMAGE。不需要 XY plot。上面 demo 用的就是这一类节点。 |
-| **LoRA Block Weight Group (FLUX)** / **(Qwen-Image)** / **(SD3.5 Large)** | 对**块组**扫描(比如 `D00-D06`、`B10-B19`、`J00-J09`),适合大致定位之后做细化。 |
-| **LoRA Block Weight Custom (FLUX)** / **(Qwen-Image)** / **(SD3.5 Large)** | 终极调试:通过逗号分隔列表单独设置每一个块(FLUX 57 个,Qwen-Image 60 个,SD3.5 38 个)。 |
+| **LoRA Block Weight (FLUX.1)** / **(Qwen-Image)** / **(SD3.5 Large)** | 可直接替换 `LoraLoader`,一次一个块 × 一个值。配 Efficiency XY Plot 跑网格扫描。 |
+| **LoRA Block Weight Batch (FLUX.1)** / **(Qwen-Image)** / **(SD3.5 Large)** | 一体式:内部循环 `(block, value)`、逐个采样、返回 batched IMAGE。不需要 XY plot。上面 demo 用的就是这一类节点。 |
+| **LoRA Block Weight Group (FLUX.1)** / **(Qwen-Image)** / **(SD3.5 Large)** | 对**块组**扫描(比如 `D00-D06`、`B10-B19`、`J00-J09`),适合大致定位之后做细化。 |
+| **LoRA Block Weight Custom (FLUX.1)** / **(Qwen-Image)** / **(SD3.5 Large)** | 终极调试:通过逗号分隔列表单独设置每一个块(FLUX.1 57 个,Qwen-Image 60 个,SD3.5 38 个)。 |
 | **LoRA Block Weight Save Grid** | 把 batched IMAGE 输出渲染成标注网格 PNG(Y 轴块名、X 轴权重)。模型无关。 |
 
 块标签:
-- **FLUX**:`D00..D18`(double-stream)+ `S00..S37`(single-stream)= 57 块
+- **FLUX.1**:`D00..D18`(double-stream)+ `S00..S37`(single-stream)= 57 块
 - **Qwen-Image**:`B00..B59` = 60 个 transformer 块
 - **SD3.5 Large**:`J00..J37` = 38 个 joint block(MMDiT 内含 context + image 两半)
 
@@ -244,7 +271,7 @@ git clone https://github.com/Baldwinzc/ComfyUI-LoraBlockWeight.git
 每个 DiT 模型的 transformer 块结构都不一样,为 SDXL U-Net 写的按块
 LoRA 加载器映射不过来:
 
-- **FLUX**:19 个 double-stream 块(`double_blocks.{N}`)+ 38 个
+- **FLUX.1**:19 个 double-stream 块(`double_blocks.{N}`)+ 38 个
   single-stream 块(`single_blocks.{N}`)。标签 `D00..D18` 和 `S00..S37`。
 - **Qwen-Image**:60 个 single-stream MMDiT 块(`transformer_blocks.{N}`),
   每块内部做图文联合注意力。标签 `B00..B59`。
@@ -261,7 +288,7 @@ LoRA 加载器映射不过来:
 
 按块 LoRA 权重这项技术来自
 [hako-mikan/sd-webui-lora-block-weight](https://github.com/hako-mikan/sd-webui-lora-block-weight)
-(SD1.5/SDXL,A1111)。本节点把这个思路移植到 ComfyUI,并适配了 FLUX 的
+(SD1.5/SDXL,A1111)。本节点把这个思路移植到 ComfyUI,并适配了 FLUX.1 的
 transformer 结构。
 
 ## 许可证

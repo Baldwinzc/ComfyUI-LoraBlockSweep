@@ -5,11 +5,16 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
 [![ComfyUI](https://img.shields.io/badge/ComfyUI-custom%20node-success)](https://github.com/comfyanonymous/ComfyUI)
-[![Model: FLUX](https://img.shields.io/badge/model-FLUX-orange)](https://blackforestlabs.ai/)
+[![Model: FLUX.1](https://img.shields.io/badge/model-FLUX.1-orange)](https://blackforestlabs.ai/)
 [![Model: Qwen-Image](https://img.shields.io/badge/model-Qwen--Image-purple)](https://github.com/QwenLM/Qwen-Image)
 [![Model: SD3.5](https://img.shields.io/badge/model-SD3.5%20Large-blue)](https://stability.ai/news/introducing-stable-diffusion-3-5)
 
-Per-block LoRA weighting for DiT models — **FLUX** (19 double + 38 single
+**Got a LoRA that overpowers your prompt, bleeds style onto the wrong things,
+or fights with other LoRAs you stack on top?** Per-block weighting lets you
+keep the blocks that carry the good parts and zero the blocks that misbehave —
+but you need to know *which* blocks. This finds out.
+
+Per-block LoRA weighting for DiT models — **FLUX.1** (19 double + 38 single
 = 57 blocks), **Qwen-Image** (60 transformer blocks) and **SD3.5 Large**
 (38 joint blocks). Sweep each block's strength independently and read the
 impact of every block straight off a labeled grid.
@@ -29,14 +34,14 @@ impact of every block straight off a labeled grid.
 Most LoRA loaders take a single `strength` scalar that applies to the whole
 adapter. Block-wise loaders for SD1.5/SDXL (LBW, Bobs Lora Loader) expose ~14
 conceptual block groups. **This exposes the DiT's actual transformer blocks**
-(57 for FLUX, 60 for Qwen-Image, 38 for SD3.5 Large), so a single-block sweep
+(57 for FLUX.1, 60 for Qwen-Image, 38 for SD3.5 Large), so a single-block sweep
 gives you a clean per-layer signal — which blocks matter, which are dead
 weight, which you can dial down without losing the style.
 
 Pairs with [Efficiency Nodes' XY Plot](https://github.com/jags111/efficiency-nodes-comfyui)
 or runs standalone via the batch node — no external orchestration required.
 
-## Demo 1 — FLUX with `alvdansen/frosting_lane_flux`
+## Demo 1 — FLUX.1 with `alvdansen/frosting_lane_flux`
 
 A two-stage experiment that builds the hero at the top of this README.
 
@@ -53,7 +58,7 @@ above. The MSE ranking from Stage 1 turns out to predict the visual outcome
 of Stage 2 cleanly: kill the top 7, lose the style; kill the bottom 7, lose
 nothing.
 
-![Per-block impact bar chart (FLUX)](docs/impact_chart_d.png)
+![Per-block impact bar chart (FLUX.1)](docs/impact_chart_d.png)
 
 |         | Block | MSE       |
 |---------|-------|-----------|
@@ -90,7 +95,7 @@ Reproduce:
 ## Demo 2 — Qwen-Image with `alfredplpl/qwen-image-modern-anime-lora`
 
 Same recipe, different DiT model, different LoRA — to show the technique
-isn't FLUX-specific.
+isn't FLUX.1-specific.
 
 ![Group knockout (Qwen-Image): Full / Top-12 off / Bot-12 off / No LoRA](docs/hero_group_qwen.png)
 
@@ -98,7 +103,7 @@ isn't FLUX-specific.
 > blocks** strips the LoRA's modern-anime style — the result falls back
 > toward a photographic look. Knocking out the **12 lowest-MSE blocks** is
 > visually indistinguishable from Full LoRA. With more blocks Qwen spreads
-> the LoRA signal further: **top/bottom MSE ratio = 24×** vs FLUX's 14×.
+> the LoRA signal further: **top/bottom MSE ratio = 24×** vs FLUX.1's 14×.
 
 **Stage 1.** Sweep all 60 transformer blocks at `{0, 0.25, 0.5, 0.75, 1.0}`,
 others held at `1.0`. 300 images, 768×768, fp8. MSE-rank knockout vs full.
@@ -158,7 +163,7 @@ attention).
 > noticeably — composition collapses (the outdoor cloud scene flattens to a
 > plain background) and the style softens — but doesn't fully revert to the
 > No-LoRA look. SD3.5's joint blocks carry the LoRA signal more redundantly
-> than FLUX's double-stream stack: a single top group isn't enough to strip
+> than FLUX.1's double-stream stack: a single top group isn't enough to strip
 > the style. **Top/bottom MSE ratio = 47×**, the most extreme of the three
 > demos.
 
@@ -206,6 +211,32 @@ Reproduce (SD3.5 variant):
 - [`_dev/build_group_workflow_sd35.py`](_dev/build_group_workflow_sd35.py) — generate the Stage 2 workflow
 - `python _dev/make_hero.py <prompt_id> --model sd35` — compose the 4-up hero
 
+## Recommended workflow
+
+Three passes take a LoRA from "black-box scalar strength" to "tuned per-block
+recipe":
+
+1. **Scan and rank.** Run a full sweep with the Batch node (or XY plot) at
+   `baseline_weight = 1.0`. Feed the result to `_dev/fetch_and_analyze.py`
+   to MSE-rank every block. You now have a **Critical / Mid / Negligible**
+   split like the tables in the demos above.
+
+2. **Drop the dead weight.** Open the Custom node and set every Negligible
+   block to `0`. These blocks contribute almost nothing visually — zeroing
+   them reduces interference when stacking with other LoRAs, frees capacity
+   for prompt adherence, and slightly cheapens inference. Lowest-risk,
+   highest-ROI edit.
+
+3. **Tune the middle.** Critical blocks stay at `1.0` (or your preferred
+   global strength). Mid blocks are the dial — try `0.5` via the Custom node
+   and compare against Full. If the LoRA still leaks style onto unwanted
+   subjects, walk Mid blocks lower. If you want *more* of the LoRA look,
+   push Mid blocks past `1.0`.
+
+For a faster first pass, skip step 1's full sweep and use the per-model
+"first-round recipes" in [USAGE.md](USAGE.md) — a sparse 10–12 block subset
+that surfaces the active neighbourhood in 50–95 images instead of 190–300.
+
 ## Install
 
 **Via [ComfyUI-Manager](https://github.com/ltdrdata/ComfyUI-Manager)** (when listed): search "LoraBlockWeight" → Install.
@@ -225,14 +256,14 @@ Dependencies (`numpy`, `Pillow`, `torch`) are already pulled in by ComfyUI.
 
 | Node | Use when |
 |------|----------|
-| **LoRA Block Weight (FLUX)** / **(Qwen-Image)** / **(SD3.5 Large)** | Drop-in `LoraLoader` replacement, one block × one value. Wire to Efficiency XY Plot for grid sweeps. |
-| **LoRA Block Weight Batch (FLUX)** / **(Qwen-Image)** / **(SD3.5 Large)** | All-in-one: loops over `(block, value)` internally, samples each, returns a batched IMAGE. No XY plot needed. Used in the demos above. |
-| **LoRA Block Weight Group (FLUX)** / **(Qwen-Image)** / **(SD3.5 Large)** | Sweep *grouped* blocks (e.g. `D00-D06`, `B10-B19`, `J00-J09`) once you've narrowed down where the action is. |
-| **LoRA Block Weight Custom (FLUX)** / **(Qwen-Image)** / **(SD3.5 Large)** | Final pass: set every block individually via a comma-separated list (57 for FLUX, 60 for Qwen-Image, 38 for SD3.5). |
+| **LoRA Block Weight (FLUX.1)** / **(Qwen-Image)** / **(SD3.5 Large)** | Drop-in `LoraLoader` replacement, one block × one value. Wire to Efficiency XY Plot for grid sweeps. |
+| **LoRA Block Weight Batch (FLUX.1)** / **(Qwen-Image)** / **(SD3.5 Large)** | All-in-one: loops over `(block, value)` internally, samples each, returns a batched IMAGE. No XY plot needed. Used in the demos above. |
+| **LoRA Block Weight Group (FLUX.1)** / **(Qwen-Image)** / **(SD3.5 Large)** | Sweep *grouped* blocks (e.g. `D00-D06`, `B10-B19`, `J00-J09`) once you've narrowed down where the action is. |
+| **LoRA Block Weight Custom (FLUX.1)** / **(Qwen-Image)** / **(SD3.5 Large)** | Final pass: set every block individually via a comma-separated list (57 for FLUX.1, 60 for Qwen-Image, 38 for SD3.5). |
 | **LoRA Block Weight Save Grid** | Renders the batched IMAGE output into a labeled grid PNG (block names on Y axis, weights on X axis). Model-agnostic. |
 
 Block tags:
-- **FLUX**: `D00..D18` (double-stream) + `S00..S37` (single-stream) = 57 blocks
+- **FLUX.1**: `D00..D18` (double-stream) + `S00..S37` (single-stream) = 57 blocks
 - **Qwen-Image**: `B00..B59` = 60 transformer blocks
 - **SD3.5 Large**: `J00..J37` = 38 joint blocks (MMDiT context + image halves)
 
@@ -252,7 +283,7 @@ See [USAGE.md](USAGE.md) for full workflow recipes.
 Each DiT model lays its transformer blocks out differently, and block-wise
 LoRA loaders built for SDXL's U-Net don't map cleanly:
 
-- **FLUX**: 19 double-stream blocks (`double_blocks.{N}`) then 38 single-stream
+- **FLUX.1**: 19 double-stream blocks (`double_blocks.{N}`) then 38 single-stream
   blocks (`single_blocks.{N}`). Tags `D00..D18` and `S00..S37`.
 - **Qwen-Image**: 60 single-stream MMDiT blocks (`transformer_blocks.{N}`) with
   joint image+text attention inside each block. Tags `B00..B59`.
@@ -271,7 +302,7 @@ the smallest template.
 Block-wise LoRA weighting as a technique comes from
 [hako-mikan/sd-webui-lora-block-weight](https://github.com/hako-mikan/sd-webui-lora-block-weight)
 (SD1.5/SDXL, A1111). This node ports the idea to ComfyUI and adapts it to
-FLUX's transformer layout.
+FLUX.1's transformer layout.
 
 ## License
 

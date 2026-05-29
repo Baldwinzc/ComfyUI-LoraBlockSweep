@@ -16,11 +16,11 @@
 
 ## 快速开始：用 Efficiency XY Plot 跑 knock-out 扫描
 
-把 `LoRA Block Weight (FLUX)` 接到原本 `LoraLoader` 的位置：
+把 `LoRA Block Weight (FLUX.1)` 接到原本 `LoraLoader` 的位置：
 
 ```
 UNETLoader      ──┐
-                  ├──▶ LoRA Block Weight (FLUX) ──▶ KSampler
+                  ├──▶ LoRA Block Weight (FLUX.1) ──▶ KSampler
 DualCLIPLoader ──┘
                        lora_name = <your_lora>.safetensors
                        baseline_weight = 1.0
@@ -57,7 +57,7 @@ DualCLIPLoader ──┘
 
 ## 一体式：Batch 节点（不需要 XY plot）
 
-如果你不想装 Efficiency Nodes，用 **LoRA Block Weight Batch (FLUX)** 即可。
+如果你不想装 Efficiency Nodes，用 **LoRA Block Weight Batch (FLUX.1)** 即可。
 它内部循环 `(block, value)`、逐个采样，返回 batched IMAGE。
 
 ```
@@ -93,7 +93,7 @@ D00,D01,D02,D03,D04,D05,D06,D07,D08,D09,D10,D11,D12,D13,D14,D15,D16,D17,D18
 
 ## 块组扫描（在大致定位之后）
 
-用 **LoRA Block Weight Group (FLUX)** 把连续的块范围作为一个整体扫描。
+用 **LoRA Block Weight Group (FLUX.1)** 把连续的块范围作为一个整体扫描。
 组可以是范围（`D00-D06`）、单块（`S15`）或混合逗号列表
 （`D00-D03,S20`）。范围不能跨 D 和 S。
 
@@ -103,7 +103,7 @@ D00,D01,D02,D03,D04,D05,D06,D07,D08,D09,D10,D11,D12,D13,D14,D15,D16,D17,D18
 
 ## 精细微调全部 57 块
 
-用 **LoRA Block Weight Custom (FLUX)**。按以下顺序粘贴 57 个值的逗号列表：
+用 **LoRA Block Weight Custom (FLUX.1)**。按以下顺序粘贴 57 个值的逗号列表：
 
     D00,D01,...,D18,S00,S01,...,S37
 
@@ -116,7 +116,7 @@ D00,D01,D02,D03,D04,D05,D06,D07,D08,D09,D10,D11,D12,D13,D14,D15,D16,D17,D18
 ## Qwen-Image
 
 Qwen-Image 有 60 个 single-stream transformer 块（标签 `B00..B59`）。
-所有 Qwen 节点和 FLUX 节点一一对应 —— 只是把节点名里的 `(FLUX)` 换成
+所有 Qwen 节点和 FLUX.1 节点一一对应 —— 只是把节点名里的 `(FLUX.1)` 换成
 `(Qwen-Image)`，块标签从 `D00-D18,S00-S37` 换成 `B00..B59`。
 
 ```
@@ -157,7 +157,7 @@ B00,B05,B10,B15,B20,B25,B30,B35,B40,B45,B50,B55
 ## SD3.5 Large
 
 SD3.5 Large 有 38 个 MMDiT joint block（标签 `J00..J37`）。所有 SD3.5
-节点和上面 FLUX/Qwen 版本一一对应 —— 节点名换成 `(SD3.5 Large)`，块
+节点和上面 FLUX.1/Qwen 版本一一对应 —— 节点名换成 `(SD3.5 Large)`，块
 标签用 `J00..J37` 即可。
 
 ```

@@ -1,6 +1,6 @@
-"""FLUX adapter for LoRA block sweeps.
+"""FLUX.1 adapter for LoRA block sweeps.
 
-FLUX's transformer has 19 double-stream blocks then 38 single-stream blocks
+FLUX.1's transformer has 19 double-stream blocks then 38 single-stream blocks
 (57 total). LoRA keys live under `diffusion_model.double_blocks.{N}.` and
 `diffusion_model.single_blocks.{N}.` — we tag them D00..D18 and S00..S37.
 """
@@ -15,7 +15,7 @@ from ._core import (
 
 FLUX_SPEC = BlockSpec(
     model_key="flux",
-    display_name="FLUX",
+    display_name="FLUX.1",
     tag_groups={
         "D": (19, r"diffusion_model\.double_blocks\.(\d+)\."),
         "S": (38, r"diffusion_model\.single_blocks\.(\d+)\."),
@@ -58,8 +58,8 @@ NODE_CLASS_MAPPINGS = {
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "LoraBlockWeightFlux": "LoRA Block Weight (FLUX)",
-    "LoraBlockWeightFluxCustom": "LoRA Block Weight Custom (FLUX)",
-    "LoraBlockWeightFluxBatch": "LoRA Block Weight Batch (FLUX)",
-    "LoraBlockWeightFluxGroup": "LoRA Block Weight Group (FLUX)",
+    "LoraBlockWeightFlux": "LoRA Block Weight (FLUX.1)",
+    "LoraBlockWeightFluxCustom": "LoRA Block Weight Custom (FLUX.1)",
+    "LoraBlockWeightFluxBatch": "LoRA Block Weight Batch (FLUX.1)",
+    "LoraBlockWeightFluxGroup": "LoRA Block Weight Group (FLUX.1)",
 }

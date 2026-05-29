@@ -4,7 +4,7 @@ SD3.5 Large is an MMDiT with 38 `joint_blocks` (joint image+text attention
 inside each block, split into `context_block` / `x_block` halves). LoRA keys
 live under `diffusion_model.joint_blocks.{N}.` — we tag them J00..J37.
 
-The internal key prefix `joint_blocks` is unique to SD3 / SD3.5 (vs FLUX's
+The internal key prefix `joint_blocks` is unique to SD3 / SD3.5 (vs FLUX.1's
 `double_blocks`/`single_blocks` or Qwen's `transformer_blocks`). ComfyUI's
 SD3 LoRA key mapping in `comfy/lora.py` strips the `diffusion_model.` /
 `.weight` framing, so the same regex used for state-dict key classification
