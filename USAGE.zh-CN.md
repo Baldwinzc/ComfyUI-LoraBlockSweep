@@ -76,6 +76,13 @@ images out ─→ LoRA Block Weight Save Grid   （标注网格 PNG）
            └→ SaveImage                    （也保留单独的格子）
 ```
 
+在 ComfyUI 里就是这套连法：
+
+![ComfyUI 里的一体化 Batch 扫描连法](docs/workflow_batch_flux.png)
+
+> 把 [`example_workflows/flux_batch_sweep.json`](example_workflows/flux_batch_sweep.json)
+> 拖进画布即可加载，再把模型 / LoRA 名字换成你自己的。
+
 故意没有 `CLIP` 输入 —— positive/negative 已经在上游编码完了，CLIP 侧的
 LoRA patch 不会生效。如果你需要 CLIP 侧 LoRA，用常规 Block Weight 节点
 + Efficiency XY Plot。

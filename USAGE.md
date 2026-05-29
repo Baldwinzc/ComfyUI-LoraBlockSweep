@@ -79,6 +79,13 @@ images out ─→ LoRA Block Weight Save Grid   (labeled grid PNG)
            └→ SaveImage                    (also keeps individual cells)
 ```
 
+The same graph in ComfyUI:
+
+![All-in-one Batch sweep graph in ComfyUI](docs/workflow_batch_flux.png)
+
+> Drag [`example_workflows/flux_batch_sweep.json`](example_workflows/flux_batch_sweep.json)
+> onto the canvas to load it, then swap in your own model / LoRA names.
+
 `CLIP` input is intentionally absent — positive/negative are already encoded
 upstream, so CLIP-side LoRA patches would have no effect. If you need
 CLIP-side LoRA, use the regular Block Weight node + Efficiency XY Plot.

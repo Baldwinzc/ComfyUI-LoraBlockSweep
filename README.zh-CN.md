@@ -38,6 +38,14 @@ Qwen-Image 60 个、SD3.5 Large 38 个），按块扫一遍就能拿到清晰的
 可以配合 [Efficiency Nodes 的 XY Plot](https://github.com/jags111/efficiency-nodes-comfyui)
 使用，或通过自带的 batch 节点独立运行,不需要外部编排工具。
 
+![ComfyUI 里的一体化 Batch 扫描连法](docs/workflow_batch_flux.png)
+
+一体化连法:加载 model / CLIP / VAE,编码 prompt,然后全部接进 **Batch**
+节点(它内部自动循环每个 `(block, value)`),再用 **Save Grid** 渲染出网格 ——
+全程不需要 XY Plot。把
+[`example_workflows/flux_batch_sweep.json`](example_workflows/flux_batch_sweep.json)
+拖进 ComfyUI 画布即可加载这套现成连法。
+
 ## Demo 1 —— FLUX.1 + [Frosting Lane](https://huggingface.co/alvdansen/frosting_lane_flux)
 
 最上面那张 hero 图来自一个两阶段实验。

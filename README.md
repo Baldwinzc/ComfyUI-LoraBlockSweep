@@ -41,6 +41,14 @@ weight, which you can dial down without losing the style.
 Pairs with [Efficiency Nodes' XY Plot](https://github.com/jags111/efficiency-nodes-comfyui)
 or runs standalone via the batch node — no external orchestration required.
 
+![All-in-one Batch sweep graph in ComfyUI](docs/workflow_batch_flux.png)
+
+The all-in-one setup: load model / CLIP / VAE, encode the prompt, then feed
+everything into the **Batch** node (it loops every `(block, value)` internally)
+and render the result with **Save Grid** — no XY Plot needed. Drag
+[`example_workflows/flux_batch_sweep.json`](example_workflows/flux_batch_sweep.json)
+onto the ComfyUI canvas to load this exact graph.
+
 ## Demo 1 — FLUX.1 with [Frosting Lane](https://huggingface.co/alvdansen/frosting_lane_flux)
 
 A two-stage experiment that builds the hero at the top of this README.
