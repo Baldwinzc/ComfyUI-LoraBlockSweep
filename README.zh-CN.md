@@ -38,7 +38,7 @@ Qwen-Image 60 个、SD3.5 Large 38 个），按块扫一遍就能拿到清晰的
 可以配合 [Efficiency Nodes 的 XY Plot](https://github.com/jags111/efficiency-nodes-comfyui)
 使用，或通过自带的 batch 节点独立运行,不需要外部编排工具。
 
-## Demo 1 —— FLUX.1 + `alvdansen/frosting_lane_flux`
+## Demo 1 —— FLUX.1 + [Frosting Lane](https://huggingface.co/alvdansen/frosting_lane_flux)
 
 最上面那张 hero 图来自一个两阶段实验。
 
@@ -86,7 +86,7 @@ D00 → D01 之间 14× 的差距,正是 hero 的 Bot-7 off 看起来和 Full
 - [`_dev/build_group_workflow.py`](_dev/build_group_workflow.py) —— 生成 Stage 2 workflow
 - `python _dev/make_hero.py <prompt_id>` —— 合成四联 hero 图
 
-## Demo 2 —— Qwen-Image + `alfredplpl/qwen-image-modern-anime-lora`
+## Demo 2 —— Qwen-Image + [Modern Anime](https://huggingface.co/alfredplpl/qwen-image-modern-anime-lora)
 
 同样的实验流程换到 Qwen-Image + 另一个 LoRA,证明这个方法不是 FLUX.1 专属。
 
@@ -142,7 +142,7 @@ D00 → D01 之间 14× 的差距,正是 hero 的 Bot-7 off 看起来和 Full
 - [`_dev/build_group_workflow_qwen.py`](_dev/build_group_workflow_qwen.py) —— 生成 Stage 2 workflow
 - `python _dev/make_hero.py <prompt_id> --model qwen` —— 合成四联 hero 图
 
-## Demo 3 —— SD3.5 Large + `prithivMLmods/SD3.5-Large-Anime-LoRA`
+## Demo 3 —— SD3.5 Large + [Anime LoRA](https://huggingface.co/prithivMLmods/SD3.5-Large-Anime-LoRA)
 
 第三个 DiT、第三种架构 —— SD3.5 Large 的 38 个 MMDiT `joint_blocks`，每块
 内部分成 `context_block`（文本）与 `x_block`（图像）两半，共享联合注意力。

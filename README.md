@@ -41,7 +41,7 @@ weight, which you can dial down without losing the style.
 Pairs with [Efficiency Nodes' XY Plot](https://github.com/jags111/efficiency-nodes-comfyui)
 or runs standalone via the batch node — no external orchestration required.
 
-## Demo 1 — FLUX.1 with `alvdansen/frosting_lane_flux`
+## Demo 1 — FLUX.1 with [Frosting Lane](https://huggingface.co/alvdansen/frosting_lane_flux)
 
 A two-stage experiment that builds the hero at the top of this README.
 
@@ -92,7 +92,7 @@ Reproduce:
 - [`_dev/build_group_workflow.py`](_dev/build_group_workflow.py) — generate the Stage 2 workflow
 - `python _dev/make_hero.py <prompt_id>` — compose the 4-up hero
 
-## Demo 2 — Qwen-Image with `alfredplpl/qwen-image-modern-anime-lora`
+## Demo 2 — Qwen-Image with [Modern Anime](https://huggingface.co/alfredplpl/qwen-image-modern-anime-lora)
 
 Same recipe, different DiT model, different LoRA — to show the technique
 isn't FLUX.1-specific.
@@ -149,7 +149,7 @@ Reproduce (Qwen variant):
 - [`_dev/build_group_workflow_qwen.py`](_dev/build_group_workflow_qwen.py) — generate the Stage 2 workflow
 - `python _dev/make_hero.py <prompt_id> --model qwen` — compose the 4-up hero
 
-## Demo 3 — SD3.5 Large with `prithivMLmods/SD3.5-Large-Anime-LoRA`
+## Demo 3 — SD3.5 Large with [Anime LoRA](https://huggingface.co/prithivMLmods/SD3.5-Large-Anime-LoRA)
 
 Third DiT, third architecture — SD3.5 Large's 38 MMDiT `joint_blocks` (each
 with `context_block` for text and `x_block` for image, sharing joint
