@@ -1,7 +1,7 @@
 [project]
 name = "comfyui-lorablockweight"
 description = "Per-block LoRA weighting for DiT models (FLUX.1, Qwen-Image, SD3.5 Large): scan every transformer block, sweep strengths, and render labeled comparison grids."
-version = "2.1.0"
+version = "2.2.0"
 license = { file = "LICENSE" }
 readme = "README.md"
 requires-python = ">=3.10"
