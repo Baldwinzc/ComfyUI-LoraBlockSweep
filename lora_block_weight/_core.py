@@ -127,6 +127,34 @@ def parse_group(spec: BlockSpec, group_spec: str) -> list:
     return tags
 
 
+def parse_custom_weights(spec: BlockSpec, weights: str,
+                         baseline_weight: float) -> dict:
+    """Parse a comma list of per-block weights into {tag: strength}.
+
+    Strict: the list must hold exactly one numeric value per block, in
+    `spec.block_names` order. A wrong count or a non-numeric entry raises
+    ValueError rather than silently falling back to baseline_weight — a typo
+    should fail loudly, not turn into a different experiment.
+    """
+    parts = [w.strip() for w in weights.split(",") if w.strip() != ""]
+    n = len(spec.block_names)
+    if len(parts) != n:
+        raise ValueError(
+            f"weights has {len(parts)} values, expected {n} "
+            f"(one per block, order {spec.block_names[0]}..{spec.block_names[-1]})"
+        )
+    per_block = {}
+    for i, tag in enumerate(spec.block_names):
+        try:
+            per_block[tag] = float(parts[i])
+        except ValueError:
+            raise ValueError(
+                f"weights[{i}] (block {tag}) = {parts[i]!r} is not a number"
+            )
+    per_block["extras"] = baseline_weight
+    return per_block
+
+
 def build_block_strengths(spec: BlockSpec, target_block: str,
                           target_value: float, baseline_weight: float) -> dict:
     """{tag: strength} with target_block at target_value, others at baseline.
@@ -156,8 +184,8 @@ def apply_blockwise_patches(spec: BlockSpec, model_patcher,
                             loaded_patches: dict, block_strengths: dict,
                             debug: bool = False):
     """Group loaded patches by block tag, then `add_patches` once per group
-    with the per-block strength. Empty-strength groups are skipped to avoid
-    no-op work.
+    with the per-block strength. Block tags with no resolved patches are
+    skipped to avoid no-op work.
     """
     by_block = defaultdict(dict)
     for k, v in loaded_patches.items():
@@ -351,17 +379,7 @@ class _CustomSweepBase(_SweepBase):
     def apply(self, model, clip, lora_name, weights, baseline_weight,
               clip_strength):
         spec = self.SPEC
-        parts = [w.strip() for w in weights.split(",")]
-        per_block = {}
-        for i, tag in enumerate(spec.block_names):
-            if i < len(parts):
-                try:
-                    per_block[tag] = float(parts[i])
-                    continue
-                except ValueError:
-                    pass
-            per_block[tag] = baseline_weight
-        per_block["extras"] = baseline_weight
+        per_block = parse_custom_weights(spec, weights, baseline_weight)
 
         loaded = load_lora_for_sweep(model, clip, lora_name)
         new_model = model.clone()

@@ -33,7 +33,7 @@ double + 38 个 single = 57 块）、**Qwen-Image**（60 个 transformer 块）�
 SD1.5/SDXL 的按块加载器（LBW、Bobs Lora Loader）暴露的是 14 个左右的
 概念块组。**本节点暴露的是 DiT 真实的 transformer block**（FLUX.1 57 个、
 Qwen-Image 60 个、SD3.5 Large 38 个），按块扫一遍就能拿到清晰的逐层
-信号 —— 哪些块重要、哪些是死重、哪些可以调低而不丢风格。
+信号 —— 哪些块重要、哪些近乎死重、哪些可以调低而不丢风格。
 
 可以配合 [Efficiency Nodes 的 XY Plot](https://github.com/jags111/efficiency-nodes-comfyui)
 使用，或通过自带的 batch 节点独立运行,不需要外部编排工具。
@@ -232,6 +232,23 @@ Full LoRA、No LoRA 对比。相同 prompt、相同 seed。
 里每个模型的"第一轮推荐配方" —— 稀疏取 10–12 个块就能定位活跃段，
 50–95 张图就够，不用跑满 190–300。
 
+> **排名要当成"本次实验专属"来读。** 这里的 MSE 是**单个** prompt、单个
+> seed、单个分辨率、单个采样器下的像素级差异 —— 是视觉影响的近似代理，
+> 不是某块"普适价值"的定论。某块这一轮排进"可忽略"，不代表它在所有场景
+> 都没用;把某块永久置零之前，建议换几个 prompt 复测一下。
+
+## 什么时候别用它
+
+- **只是想让 LoRA 在满强度下好看** —— 用普通 LoRA 加载器就行，这是诊断
+  显微镜，不是一键增强。
+- **时间 / 显存紧张** —— 完整扫描是 190–300 张图。先用 [USAGE.md](USAGE.md)
+  里的稀疏首轮配方，或者干脆别扫。
+- **你需要 LoRA 的 text-encoder（CLIP 侧）效果** —— Batch 节点只 patch
+  UNet/transformer（prompt 在上游就编码好了）。要 CLIP 侧 LoRA，请用普通
+  加载器 + 单块节点配 XY Plot。
+- **LoRA 很轻、本来就乖** —— 按块手术对"盖过 prompt、糊错风格、叠加打架"
+  的 LoRA 才划算，对本身就规矩的 LoRA 收益有限。
+
 ## 安装
 
 **通过 [ComfyUI-Manager](https://github.com/ltdrdata/ComfyUI-Manager)(待收录后)**:
@@ -247,6 +264,11 @@ git clone https://github.com/Baldwinzc/ComfyUI-LoraBlockWeight.git
 重启 ComfyUI。
 
 依赖(`numpy`、`Pillow`、`torch`)都已经被 ComfyUI 自带。
+
+兼容当前版本的 ComfyUI —— 能加载 FLUX.1 / Qwen-Image / SD3.5 的那些版本
+即可。它依赖 `comfy.lora` / `comfy.sample` 这些相对稳定的内部接口;万一以后
+ComfyUI 重构导致加载失败，欢迎
+[提 issue](https://github.com/Baldwinzc/ComfyUI-LoraBlockWeight/issues)。
 
 ## 节点
 

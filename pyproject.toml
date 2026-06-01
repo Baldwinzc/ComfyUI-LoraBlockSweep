@@ -21,6 +21,13 @@ dependencies = []
 Repository = "https://github.com/Baldwinzc/ComfyUI-LoraBlockWeight"
 "Bug Tracker" = "https://github.com/Baldwinzc/ComfyUI-LoraBlockWeight/issues"
 
+[tool.pytest.ini_options]
+# Default (prepend) import mode: pytest walks up only through dirs that have
+# __init__.py and stops at tests/ (which has none), so it never imports the
+# repo-root __init__.py (ComfyUI's entry point, which uses a package-relative
+# import). tests/conftest.py stubs the ComfyUI-only modules.
+testpaths = ["tests"]
+
 [tool.comfy]
 PublisherId = "baldwinzc"
 DisplayName = "ComfyUI-LoraBlockWeight"

@@ -4,6 +4,7 @@ __pycache__/
 .DS_Store
 .vscode/
 .idea/
+.pytest_cache/
 
 # Local experiment scratch — heavy PNGs, raw cell dumps.
 _dev/sweep_*_results/

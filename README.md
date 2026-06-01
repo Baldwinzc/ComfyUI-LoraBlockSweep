@@ -35,7 +35,7 @@ Most LoRA loaders take a single `strength` scalar that applies to the whole
 adapter. Block-wise loaders for SD1.5/SDXL (LBW, Bobs Lora Loader) expose ~14
 conceptual block groups. **This exposes the DiT's actual transformer blocks**
 (57 for FLUX.1, 60 for Qwen-Image, 38 for SD3.5 Large), so a single-block sweep
-gives you a clean per-layer signal — which blocks matter, which are dead
+gives you a clean per-layer signal — which blocks matter, which are near-dead
 weight, which you can dial down without losing the style.
 
 Pairs with [Efficiency Nodes' XY Plot](https://github.com/jags111/efficiency-nodes-comfyui)
@@ -245,6 +245,25 @@ For a faster first pass, skip step 1's full sweep and use the per-model
 "first-round recipes" in [USAGE.md](USAGE.md) — a sparse 10–12 block subset
 that surfaces the active neighbourhood in 50–95 images instead of 190–300.
 
+> **Read the ranking as experiment-specific.** MSE here is a pixel-level delta
+> for *one* prompt, seed, resolution and sampler — a proxy for visual impact,
+> not a universal measure of a block's worth. A block that ranks Negligible in
+> one run isn't proven useless everywhere; re-check on a couple of prompts
+> before treating a zeroed block as a permanent prune.
+
+## When not to use this
+
+- **You just want a LoRA to look good at full strength.** Use a normal LoRA
+  loader — this is a diagnostic microscope, not a one-click enhancer.
+- **You're tight on time or VRAM.** A full sweep is 190–300 images. Start from
+  the sparse first-round recipes in [USAGE.md](USAGE.md), or skip it.
+- **You need the LoRA's text-encoder (CLIP-side) effect.** The Batch node
+  patches the UNet/transformer only (prompts are encoded upstream). For
+  CLIP-side LoRA, use a regular loader + the single-block node with XY Plot.
+- **The LoRA is light and already behaves.** Per-block surgery pays off on
+  LoRAs that overpower prompts, bleed style, or fight when stacked — less so on
+  well-scoped ones.
+
 ## Install
 
 **Via [ComfyUI-Manager](https://github.com/ltdrdata/ComfyUI-Manager)** (when listed): search "LoraBlockWeight" → Install.
@@ -259,6 +278,11 @@ git clone https://github.com/Baldwinzc/ComfyUI-LoraBlockWeight.git
 Restart ComfyUI.
 
 Dependencies (`numpy`, `Pillow`, `torch`) are already pulled in by ComfyUI.
+
+Works with current ComfyUI builds — the same ones that load FLUX.1 /
+Qwen-Image / SD3.5. It relies on stable `comfy.lora` / `comfy.sample`
+internals; if a future ComfyUI refactor breaks loading, please
+[open an issue](https://github.com/Baldwinzc/ComfyUI-LoraBlockWeight/issues).
 
 ## Nodes
 
